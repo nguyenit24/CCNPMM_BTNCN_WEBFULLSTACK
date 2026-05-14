@@ -872,3 +872,32 @@ a {
     padding: 20px;
   }
 }
+
+.product-active-filters {
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.product-active-filters__container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.product-active-filters__label {
+  color: var(--store-text);
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.product-active-filters__list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}

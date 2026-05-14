@@ -6,7 +6,6 @@ import { AuthContext } from '../components/context/auth.context';
 import { getHomeApi } from '../util/api';
 import ProductCard from '../components/catalog/product-card';
 import PostCard from '../components/catalog/post-card';
-import { getMockHomeData } from '../data/store.mock';
 
 const HomePage = () => {
 
@@ -21,15 +20,16 @@ const HomePage = () => {
             setLoading(true);
 
             const res = await getHomeApi();
+            const hasError = Boolean(res?.message);
 
-            if (res?.message && res.message !== 'Đã xảy ra lỗi máy chủ') {
+            if (hasError && res.message !== 'Đã xảy ra lỗi máy chủ') {
                 notification.error({
                     message: 'Lấy dữ liệu trang chủ',
                     description: res.message,
                 });
             }
 
-            setData(res?.emptyStore ? getMockHomeData(memberFallback) : res);
+            setData(hasError ? null : res);
             setLoading(false);
         };
 
@@ -61,7 +61,7 @@ const HomePage = () => {
         return null;
     }
 
-    const promotions = data.promotions ?? [];
+    const promotions = Array.isArray(data.promotions) ? data.promotions : [];
     const heroSlides = promotions.length > 0 ? promotions : [data.heroPromotion].filter(Boolean);
     const member = data.member || memberFallback;
 

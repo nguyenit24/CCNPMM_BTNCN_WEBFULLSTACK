@@ -4,7 +4,6 @@ import { MinusOutlined, PlusOutlined, StarFilled } from '@ant-design/icons';
 import { Link, useParams } from 'react-router-dom';
 import ProductCard from '../components/catalog/product-card';
 import { getProductDetailApi } from '../util/api';
-import { getMockProductDetail } from '../data/store.mock';
 
 const moneyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -31,7 +30,7 @@ const ProductDetailPage = () => {
                 });
             }
 
-            setData(res?.emptyCollection ? getMockProductDetail(slug) : res);
+            setData(res);
             setLoading(false);
         };
 

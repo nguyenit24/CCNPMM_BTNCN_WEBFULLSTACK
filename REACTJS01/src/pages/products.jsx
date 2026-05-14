@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Checkbox, Empty, Select, Slider, Spin, Tag, notification } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Empty, Select, Slider, Spin, Tag, notification } from 'antd';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/catalog/product-card';
 import { getProductsApi } from '../util/api';
-import { getMockProductsData } from '../data/store.mock';
 
 const sortOptions = [
     { value: 'featured', label: 'Nổi bật' },
@@ -80,7 +78,6 @@ const ProductsPage = () => {
             };
 
             const res = await getProductsApi(filters);
-            const fallback = getMockProductsData(filters);
 
             if (res?.message && res.message !== 'Đã xảy ra lỗi máy chủ') {
                 notification.error({
@@ -89,11 +86,13 @@ const ProductsPage = () => {
                 });
             }
 
-            const useMockData = Boolean(res?.emptyCollection);
+            const nextItems = Array.isArray(res?.items) ? res.items : [];
+            const nextCategories = Array.isArray(res?.categories) ? res.categories : [];
+            const nextTotal = typeof res?.total === 'number' ? res.total : nextItems.length;
 
-            setItems(useMockData ? fallback.items : (res?.items ?? []));
-            setCategories(useMockData ? fallback.categories : (res?.categories ?? []));
-            setTotal(useMockData ? fallback.total : (typeof res?.total === 'number' ? res.total : 0));
+            setItems(nextItems);
+            setCategories(nextCategories);
+            setTotal(nextTotal);
             setLoading(false);
         };
 
@@ -112,25 +111,51 @@ const ProductsPage = () => {
         setSortValue('featured');
     };
 
+    const hasActiveFilters = Boolean(
+        keyword ||
+        selectedCategories.length > 0 ||
+        priceRange[0] > 0 ||
+        priceRange[1] < 400 ||
+        selectedStatuses.length > 1 ||
+        (selectedStatuses.length === 1 && !selectedStatuses.includes('inStock'))
+    );
+
     return (
         <div className="store-layout">
-            <div className="store-page-head">
-                <div>
-                    <p className="store-page-head__eyebrow">
-                        <SearchOutlined />
-                        Bộ lọc sản phẩm
-                    </p>
-                    <h1 className="store-page-head__title">Tìm kiếm và lọc sản phẩm</h1>
-                    <p className="store-page-head__subtitle">
-                        Tìm nhanh theo tên, danh mục, giá và các trạng thái như còn hàng, khuyến mãi hoặc bán chạy.
-                    </p>
+            {hasActiveFilters && (
+                <div className="product-active-filters">
+                    <div className="product-active-filters__container">
+                        <span className="product-active-filters__label">Bộ lọc đang áp dụng:</span>
+                        <div className="product-active-filters__list">
+                            {keyword && <Tag closable onClose={() => setKeyword('')}>Từ khóa: {keyword}</Tag>}
+                            {selectedCategories.map(cat => (
+                                <Tag key={cat} closable onClose={() => setSelectedCategories(selectedCategories.filter(c => c !== cat))}>
+                                    {categories.find(c => c.slug === cat)?.name || cat}
+                                </Tag>
+                            ))}
+                            {(priceRange[0] > 0 || priceRange[1] < 400) && (
+                                <Tag closable onClose={() => setPriceRange([0, 400])}>
+                                    Giá: ${priceRange[0]} - ${priceRange[1]}
+                                </Tag>
+                            )}
+                            {selectedStatuses.map(status => {
+                                const statusLabel = statusOptions.find(s => s.value === status)?.label;
+                                return statusLabel ? (
+                                    <Tag key={status} closable onClose={() => {
+                                        const nextStatuses = selectedStatuses.filter(s => s !== status);
+                                        setSelectedStatuses(nextStatuses.length > 0 ? nextStatuses : ['inStock']);
+                                    }}>
+                                        {statusLabel}
+                                    </Tag>
+                                ) : null;
+                            })}
+                        </div>
+                        <Button type="link" danger size="small" onClick={clearFilters}>
+                            Xóa tất cả
+                        </Button>
+                    </div>
                 </div>
-
-                <div className="store-page-head__summary">
-                    <Tag color="blue">{keyword ? `Từ khóa: ${keyword}` : 'Tất cả sản phẩm'}</Tag>
-                    <Tag color="green">{total} kết quả</Tag>
-                </div>
-            </div>
+            )}
 
             <div className="product-page">
                 <aside className="product-filter">

@@ -82,6 +82,78 @@ const getUserService = async () => {
     }
 }
 
+const createError = (status, message) => {
+    const error = new Error(message);
+    error.status = status;
+    return error;
+};
+
+const getUserDetailService = async (id) => {
+    const user = await User.findById(id).select("-password");
+    return user;
+};
+
+const updateUserService = async (id, payload = {}) => {
+    const user = await User.findById(id);
+    if (!user) {
+        throw createError(404, "User not found");
+    }
+
+    if (payload.name !== undefined) {
+        const name = String(payload.name || '').trim();
+        if (!name) {
+            throw createError(400, "User name is required");
+        }
+        user.name = name;
+    }
+
+    if (payload.email !== undefined) {
+        const email = String(payload.email || '').trim();
+        if (!email) {
+            throw createError(400, "User email is required");
+        }
+        if (email !== user.email) {
+            const exists = await User.findOne({ email });
+            if (exists) {
+                throw createError(409, "Email already exists");
+            }
+            user.email = email;
+        }
+    }
+
+    if (payload.role !== undefined) {
+        const role = String(payload.role || '').trim();
+        if (!role) {
+            throw createError(400, "User role is required");
+        }
+        user.role = role;
+    }
+
+    if (payload.password !== undefined) {
+        const password = String(payload.password || '').trim();
+        if (!password) {
+            throw createError(400, "Password is required");
+        }
+        user.password = await bcrypt.hash(password, saltRounds);
+    }
+
+    await user.save();
+
+    const result = user.toObject();
+    delete result.password;
+    return result;
+};
+
+const deleteUserService = async (id) => {
+    const user = await User.findByIdAndDelete(id).select("-password");
+    return user;
+};
+
 module.exports = {
-    createUserService, loginService, getUserService
+    createUserService,
+    loginService,
+    getUserService,
+    getUserDetailService,
+    updateUserService,
+    deleteUserService,
 }

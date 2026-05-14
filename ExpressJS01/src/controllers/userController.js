@@ -1,4 +1,11 @@
-const { createUserService, loginService, getUserService } = require("../services/userService");
+const {
+    createUserService,
+    loginService,
+    getUserService,
+    getUserDetailService,
+    updateUserService,
+    deleteUserService,
+} = require("../services/userService");
 
 const createUser = async (req, res) => {
     const { name, email, password } = req.body;
@@ -21,6 +28,50 @@ const getAccount = async (req, res) => {
     return res.status(200).json(req.user)
 }
 
+const getUserDetail = async (req, res) => {
+    try {
+        const data = await getUserDetailService(req.params.id);
+        if (!data) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
+const updateUser = async (req, res) => {
+    try {
+        const data = await updateUserService(req.params.id, req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
+const deleteUser = async (req, res) => {
+    try {
+        const data = await deleteUserService(req.params.id);
+        if (!data) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        return res.status(200).json({ deleted: true });
+    } catch (error) {
+        console.log(error);
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
 module.exports = {
-    createUser, handleLogin, getUser, getAccount
+    createUser,
+    handleLogin,
+    getUser,
+    getAccount,
+    getUserDetail,
+    updateUser,
+    deleteUser,
 }

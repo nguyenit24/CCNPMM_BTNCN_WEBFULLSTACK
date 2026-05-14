@@ -16,6 +16,7 @@ import LoginPage from './pages/login.jsx';
 import ProductsPage from './pages/products.jsx';
 import ProductDetailPage from './pages/product-detail.jsx';
 import PostDetailPage from './pages/post-detail.jsx';
+import ProfilePage from './pages/profile.jsx';
 
 import { AuthWrapper } from './components/context/auth.context.jsx';
 
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
             {
                 path: "user",
                 element: <UserPage />
+            },
+            {
+                path: "profile",
+                element: <ProfilePage />
             },
         ]
     },

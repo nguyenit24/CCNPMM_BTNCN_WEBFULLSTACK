@@ -3,7 +3,6 @@ import { Empty, Result, Spin, Tag, notification } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import PostCard from '../components/catalog/post-card';
 import { getPostDetailApi } from '../util/api';
-import { getMockPostDetail } from '../data/store.mock';
 
 const PostDetailPage = () => {
     const { slug } = useParams();
@@ -23,7 +22,7 @@ const PostDetailPage = () => {
                 });
             }
 
-            setData(res?.emptyCollection ? getMockPostDetail(slug) : res);
+            setData(res);
             setLoading(false);
         };
 

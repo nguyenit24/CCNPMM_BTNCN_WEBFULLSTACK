@@ -15,6 +15,14 @@ const normalizeList = (value) => {
 
 const escapeRegex = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const slugify = (value = '') => String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
 const buildProductQuery = (filters = {}) => {
     const query = {};
     const keyword = String(filters.q || filters.search || '').trim();
@@ -101,6 +109,7 @@ const decorateProduct = (product) => {
 module.exports = {
     normalizeList,
     escapeRegex,
+    slugify,
     buildProductQuery,
     buildSortQuery,
     decorateProduct,

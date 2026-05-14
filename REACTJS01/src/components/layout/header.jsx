@@ -60,12 +60,11 @@ const Header = () => {
             {
                 key: 'profile',
                 label: (
-                    <div className="store-account__dropdown">
+                    <Link to="/profile" className="store-account__dropdown">
                         <strong>{auth?.user?.name || 'Member'}</strong>
                         <Tag color="blue">{auth?.user?.role || 'Member'}</Tag>
-                    </div>
+                    </Link>
                 ),
-                disabled: true,
             },
             { type: 'divider' },
             {

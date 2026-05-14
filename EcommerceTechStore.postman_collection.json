@@ -1,0 +1,725 @@
+{
+  "info": {
+    "_postman_id": "90cd37b0-cfe5-46a8-b9b8-ae696ad16c6c",
+    "name": "EcommerceTechStore",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49751640"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo User\",\n  \"email\": \"demo.user@example.com\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/register"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.access_token) {",
+                  "    pm.collectionVariables.set(\"accessToken\", json.access_token);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo.user@example.com\",\n  \"password\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/login"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (Array.isArray(data) && data.length > 0 && data[0]._id) {",
+                  "  pm.collectionVariables.set(\"userId\", data[0]._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/account"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/user/{{userId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo User Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/user/{{userId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/user/{{userId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catalog - Home",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Get Home",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/home"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catalog - Categories",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (Array.isArray(data) && data.length > 0 && data[0].slug) {",
+                  "  pm.collectionVariables.set(\"categorySlug\", data[0].slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/categories/{{categorySlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.slug) {",
+                  "  pm.collectionVariables.set(\"categorySlug\", data.slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Audio\",\n  \"slug\": \"audio\",\n  \"description\": \"Premium audio gear\",\n  \"image\": \"https://picsum.photos/seed/audio/600/400\",\n  \"order\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/categories"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Audio Gear\",\n  \"description\": \"Curated audio devices and accessories\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/categories/{{categorySlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/categories/{{categorySlug}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catalog - Promotions",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List Promotions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (Array.isArray(data) && data.length > 0 && data[0].slug) {",
+                  "  pm.collectionVariables.set(\"promotionSlug\", data[0].slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/promotions"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Promotion Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/promotions/{{promotionSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Promotion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.slug) {",
+                  "  pm.collectionVariables.set(\"promotionSlug\", data.slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mega Audio Week\",\n  \"slug\": \"mega-audio-week\",\n  \"badge\": \"Hot\",\n  \"description\": \"Premium deals for members\",\n  \"highlight\": \"Up to 30% off\",\n  \"buttonLabel\": \"Shop now\",\n  \"banner\": \"https://picsum.photos/seed/promo/1200/500\",\n  \"order\": 1,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/promotions"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Promotion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mega Audio Week Updated\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/promotions/{{promotionSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Promotion",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/promotions/{{promotionSlug}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catalog - Products",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List Products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && Array.isArray(data.items) && data.items.length > 0 && data.items[0].slug) {",
+                  "  pm.collectionVariables.set(\"productSlug\", data.items[0].slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/products"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/products/{{productSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.slug) {",
+                  "  pm.collectionVariables.set(\"productSlug\", data.slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ZenPhone Pro 12\",\n  \"slug\": \"zenphone-pro-12\",\n  \"categorySlug\": \"{{categorySlug}}\",\n  \"categoryName\": \"Audio\",\n  \"shortDescription\": \"Premium wireless audio bundle\",\n  \"description\": \"High-end device tuned for immersive sound.\",\n  \"price\": 299,\n  \"compareAtPrice\": 349,\n  \"stock\": 12,\n  \"sold\": 3,\n  \"rating\": 4.6,\n  \"images\": [\n    \"https://picsum.photos/seed/zenphone/800/600\"\n  ],\n  \"tags\": [\n    \"wireless\",\n    \"hi-fi\"\n  ],\n  \"specs\": [\n    {\n      \"label\": \"Battery\",\n      \"value\": \"20h\"\n    },\n    {\n      \"label\": \"Weight\",\n      \"value\": \"240g\"\n    }\n  ],\n  \"featured\": true,\n  \"bestSeller\": true,\n  \"isNew\": true,\n  \"onSale\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/products"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 279,\n  \"onSale\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/products/{{productSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/products/{{productSlug}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Catalog - Posts",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "List Posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && Array.isArray(data.items) && data.items.length > 0 && data.items[0].slug) {",
+                  "  pm.collectionVariables.set(\"postSlug\", data.items[0].slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/posts/{{postSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.slug) {",
+                  "  pm.collectionVariables.set(\"postSlug\", data.slug);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tech Trends 2026\",\n  \"slug\": \"tech-trends-2026\",\n  \"excerpt\": \"A quick look at the biggest hardware shifts in 2026.\",\n  \"content\": \"Detailed post content goes here.\",\n  \"categorySlug\": \"news\",\n  \"categoryName\": \"News\",\n  \"cover\": \"https://picsum.photos/seed/post/900/600\",\n  \"readTime\": \"5 min read\",\n  \"featured\": true,\n  \"tags\": [\n    \"ai\",\n    \"hardware\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/posts"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"featured\": false,\n  \"readTime\": \"6 min read\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/v1/api/catalog/posts/{{postSlug}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/posts/{{postSlug}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Advanced Search & Filters",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "Search Products (Keyword + Filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/products?q=audio&category={{categorySlug}}&minPrice=50&maxPrice=400&inStock=true&bestSeller=true&onSale=true&sort=priceAsc&limit=12&page=1"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Products (Featured + New)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/products?featured=true&isNew=true&sort=newest&limit=8"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Posts (Keyword + Featured)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/v1/api/catalog/posts?q=tech&category=news&featured=true&sort=oldest&limit=5&page=1"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8888"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "categorySlug",
+      "value": ""
+    },
+    {
+      "key": "promotionSlug",
+      "value": ""
+    },
+    {
+      "key": "productSlug",
+      "value": ""
+    },
+    {
+      "key": "postSlug",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    }
+  ]
+}

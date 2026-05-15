@@ -29,6 +29,27 @@ const getUserApi = () => {
     return axios.get(URL_API)
 }
 
+const getUserDetailApi = (id) => {
+
+    const URL_API = `/v1/api/user/${id}`;
+
+    return axios.get(URL_API)
+}
+
+const updateUserApi = (id, data = {}) => {
+
+    const URL_API = `/v1/api/user/${id}`;
+
+    return axios.put(URL_API, data)
+}
+
+const deleteUserApi = (id) => {
+
+    const URL_API = `/v1/api/user/${id}`;
+
+    return axios.delete(URL_API)
+}
+
 const getAccountApi = () => {
 
     const URL_API = "/v1/api/account";
@@ -38,39 +59,178 @@ const getAccountApi = () => {
 
 const getHomeApi = () => {
 
-    const URL_API = "/v1/api/catalog/home";
+    const URL_API = "/v1/api/home";
 
     return axios.get(URL_API)
 }
 
-const getProductsApi = (params = {}) => {
+const getCategoriesApi = () => {
 
-    const URL_API = "/v1/api/catalog/products";
+    const URL_API = "/v1/api/categories";
+
+    return axios.get(URL_API)
+}
+
+const getCategoryDetailApi = (slug) => {
+
+    const URL_API = `/v1/api/categories/${slug}`;
+
+    return axios.get(URL_API)
+}
+
+const createCategoryApi = (data = {}) => {
+
+    const URL_API = "/v1/api/categories";
+
+    return axios.post(URL_API, data)
+}
+
+const updateCategoryApi = (slug, data = {}) => {
+
+    const URL_API = `/v1/api/categories/${slug}`;
+
+    return axios.put(URL_API, data)
+}
+
+const deleteCategoryApi = (slug) => {
+
+    const URL_API = `/v1/api/categories/${slug}`;
+
+    return axios.delete(URL_API)
+}
+
+const getPromotionsApi = (params = {}) => {
+
+    const URL_API = "/v1/api/promotions";
 
     return axios.get(URL_API, { params })
 }
 
+const getPromotionDetailApi = (slug) => {
+
+    const URL_API = `/v1/api/promotions/${slug}`;
+
+    return axios.get(URL_API)
+}
+
+const createPromotionApi = (data = {}) => {
+
+    const URL_API = "/v1/api/promotions";
+
+    return axios.post(URL_API, data)
+}
+
+const updatePromotionApi = (slug, data = {}) => {
+
+    const URL_API = `/v1/api/promotions/${slug}`;
+
+    return axios.put(URL_API, data)
+}
+
+const deletePromotionApi = (slug) => {
+
+    const URL_API = `/v1/api/promotions/${slug}`;
+
+    return axios.delete(URL_API)
+}
+
+const getProductsApi = (params = {}) => {
+
+    const URL_API = "/v1/api/products";
+
+    return axios.get(URL_API, { params })
+}
+
+const createProductApi = (data = {}) => {
+
+    const URL_API = "/v1/api/products";
+
+    return axios.post(URL_API, data)
+}
+
+const updateProductApi = (slug, data = {}) => {
+
+    const URL_API = `/v1/api/products/${slug}`;
+
+    return axios.put(URL_API, data)
+}
+
+const deleteProductApi = (slug) => {
+
+    const URL_API = `/v1/api/products/${slug}`;
+
+    return axios.delete(URL_API)
+}
+
 const getProductDetailApi = (slug) => {
 
-    const URL_API = `/v1/api/catalog/products/${slug}`;
+    const URL_API = `/v1/api/products/${slug}`;
 
     return axios.get(URL_API)
 }
 
 const getPostDetailApi = (slug) => {
 
-    const URL_API = `/v1/api/catalog/posts/${slug}`;
+    const URL_API = `/v1/api/posts/${slug}`;
 
     return axios.get(URL_API)
+}
+
+const getPostsApi = (params = {}) => {
+
+    const URL_API = "/v1/api/posts";
+
+    return axios.get(URL_API, { params })
+}
+
+const createPostApi = (data = {}) => {
+
+    const URL_API = "/v1/api/posts";
+
+    return axios.post(URL_API, data)
+}
+
+const updatePostApi = (slug, data = {}) => {
+
+    const URL_API = `/v1/api/posts/${slug}`;
+
+    return axios.put(URL_API, data)
+}
+
+const deletePostApi = (slug) => {
+
+    const URL_API = `/v1/api/posts/${slug}`;
+
+    return axios.delete(URL_API)
 }
 
 export {
     createUserApi,
     loginApi,
     getUserApi,
+    getUserDetailApi,
+    updateUserApi,
+    deleteUserApi,
     getAccountApi,
     getHomeApi,
+    getCategoriesApi,
+    getCategoryDetailApi,
+    createCategoryApi,
+    updateCategoryApi,
+    deleteCategoryApi,
+    getPromotionsApi,
+    getPromotionDetailApi,
+    createPromotionApi,
+    updatePromotionApi,
+    deletePromotionApi,
     getProductsApi,
+    createProductApi,
+    updateProductApi,
+    deleteProductApi,
     getProductDetailApi,
+    getPostsApi,
     getPostDetailApi,
+    createPostApi,
+    updatePostApi,
+    deletePostApi,
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Carousel, Divider, Empty, Result, Spin, Tag, notification } from 'antd';
+import { Button, Empty, Result, Spin, Tag, notification } from 'antd';
 import { MinusOutlined, PlusOutlined, StarFilled } from '@ant-design/icons';
 import { Link, useParams } from 'react-router-dom';
 import ProductCard from '../components/catalog/product-card';
@@ -15,11 +15,13 @@ const ProductDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
     const [quantity, setQuantity] = useState(1);
+    const [activeImageIndex, setActiveImageIndex] = useState(0);
 
     useEffect(() => {
         const fetchDetail = async () => {
             setLoading(true);
             setQuantity(1);
+            setActiveImageIndex(0);
 
             const res = await getProductDetailApi(slug);
 
@@ -52,6 +54,15 @@ const ProductDetailPage = () => {
     const { product, category, similarProducts } = data;
     const maxQuantity = Math.max(product.stock || 1, 1);
     const isOutOfStock = product.stock <= 0;
+    const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    const hasImages = images.length > 0;
+    const safeActiveIndex = hasImages ? Math.min(activeImageIndex, images.length - 1) : 0;
+    const activeImage = hasImages ? images[safeActiveIndex] : null;
+    const specs = Array.isArray(product.specs)
+        ? product.specs.filter((spec) => spec?.label && spec?.value)
+        : [];
+    const summaryDescription = product.shortDescription || product.description;
+    const fullDescription = product.description || product.shortDescription;
 
     return (
         <div className="store-layout">
@@ -65,13 +76,34 @@ const ProductDetailPage = () => {
 
             <div className="product-detail">
                 <div className="product-detail__gallery">
-                    <Carousel autoplay dots>
-                        {(product.images || []).map((image, index) => (
-                            <div key={`${product.slug}-${index}`} className="product-detail__slide">
-                                <img className="product-detail__image" src={image} alt={`${product.name} ${index + 1}`} />
+                    <div className="product-gallery">
+                        <div className="product-gallery__main">
+                            {activeImage ? (
+                                <img
+                                    className="product-gallery__image"
+                                    src={activeImage}
+                                    alt={`${product.name} ${safeActiveIndex + 1}`}
+                                />
+                            ) : (
+                                <div className="product-gallery__placeholder">Chưa có ảnh sản phẩm</div>
+                            )}
+                        </div>
+                        {images.length > 1 ? (
+                            <div className="product-gallery__thumbs">
+                                {images.map((image, index) => (
+                                    <button
+                                        key={`${product.slug}-${index}`}
+                                        type="button"
+                                        className={`product-gallery__thumb ${safeActiveIndex === index ? 'is-active' : ''}`}
+                                        onClick={() => setActiveImageIndex(index)}
+                                        aria-pressed={safeActiveIndex === index}
+                                    >
+                                        <img src={image} alt={`${product.name} ${index + 1}`} />
+                                    </button>
+                                ))}
                             </div>
-                        ))}
-                    </Carousel>
+                        ) : null}
+                    </div>
                 </div>
 
                 <div className="product-detail__info">
@@ -82,7 +114,9 @@ const ProductDetailPage = () => {
                     </div>
 
                     <h1 className="product-detail__title">{product.name}</h1>
-                    <p className="product-detail__description">{product.description}</p>
+                    {summaryDescription ? (
+                        <p className="product-detail__description">{summaryDescription}</p>
+                    ) : null}
 
                     <div className="product-detail__pricing">
                         <span className="product-detail__price">{moneyFormatter.format(product.price)}</span>
@@ -120,26 +154,33 @@ const ProductDetailPage = () => {
                         {isOutOfStock ? 'Hết hàng' : `Còn ${product.stock} sản phẩm trong kho`}
                     </div>
 
-                    <Divider />
-
-                    <div className="product-detail__specs">
-                        {Array.isArray(product.specs) ? product.specs.map((spec) => (
-                            <div key={spec.label} className="product-detail__spec">
-                                <span>{spec.label}</span>
-                                <strong>{spec.value}</strong>
-                            </div>
-                        )) : null}
-                    </div>
                 </div>
             </div>
 
             <div className="product-detail__content">
-                <div className="content-card">
-                    <h2 className="content-card__title">Mô tả chi tiết</h2>
-                    <p className="content-card__text">{product.description}</p>
-                    <p className="content-card__text">
-                        Sản phẩm thuộc danh mục <strong>{category?.name || product.categoryName}</strong> và phù hợp cho member muốn một bộ thiết bị gọn, cao cấp, tập trung vào trải nghiệm thực tế.
-                    </p>
+                <div className="product-detail__summary">
+                    <div className="content-card">
+                        <h2 className="content-card__title">Mô tả sản phẩm</h2>
+                        {fullDescription ? <p className="content-card__text">{fullDescription}</p> : null}
+                        <p className="content-card__text">
+                            Sản phẩm thuộc danh mục <strong>{category?.name || product.categoryName}</strong> và phù hợp cho member muốn một bộ thiết bị gọn, cao cấp, tập trung vào trải nghiệm thực tế.
+                        </p>
+                    </div>
+                    <div className="content-card product-detail__spec-card">
+                        <h2 className="content-card__title">Thông số kỹ thuật</h2>
+                        {specs.length > 0 ? (
+                            <dl className="product-detail__specs">
+                                {specs.map((spec, index) => (
+                                    <div key={`${spec.label}-${index}`} className="product-detail__spec">
+                                        <dt>{spec.label}</dt>
+                                        <dd>{spec.value}</dd>
+                                    </div>
+                                ))}
+                            </dl>
+                        ) : (
+                            <p className="product-detail__spec-empty">Chưa có thông số kỹ thuật.</p>
+                        )}
+                    </div>
                 </div>
 
                 <div className="content-card">

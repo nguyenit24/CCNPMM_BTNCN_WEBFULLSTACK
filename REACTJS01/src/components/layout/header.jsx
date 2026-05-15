@@ -79,6 +79,7 @@ const Header = () => {
     }, [auth]);
 
     const avatarLetter = (auth?.user?.name || 'M').trim().charAt(0).toUpperCase();
+    const showAdminLink = auth.isAuthenticated && String(auth?.user?.role || '').toLowerCase() === 'admin';
 
     return (
         <header className="store-header">
@@ -103,6 +104,14 @@ const Header = () => {
                 <NavLink to="/products?onSale=true" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                     Deals
                 </NavLink>
+                <NavLink to="/posts" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
+                    Bài viết
+                </NavLink>
+                {showAdminLink ? (
+                    <NavLink to="/admin" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
+                        Admin
+                    </NavLink>
+                ) : null}
             </nav>
 
             <Input.Search

@@ -37,12 +37,10 @@ const {
     updateProduct,
     deleteProduct,
 } = require('../controllers/productController');
-const auth = require('../middleware/auth');
+const { authenticate, authorizeRoles } = require('../middleware/auth');
 const delay = require('../middleware/delay');
 
 const routerAPI = express.Router();
-
-routerAPI.use(auth);
 
 routerAPI.get("/", (req, res) => {
     return res.status(200).json("Hello world api")
@@ -50,31 +48,44 @@ routerAPI.get("/", (req, res) => {
 
 routerAPI.post("/register", createUser);
 routerAPI.post("/login", handleLogin);
-routerAPI.get("/user", getUser);
-routerAPI.get("/user/:id", getUserDetail);
-routerAPI.put("/user/:id", updateUser);
-routerAPI.delete("/user/:id", deleteUser);
+
+routerAPI.get("/home", getHome);
+
+routerAPI.get("/categories", getCategories);
+routerAPI.get("/categories/:slug", getCategoryDetail);
+
+routerAPI.get("/promotions", getPromotions);
+routerAPI.get("/promotions/:slug", getPromotionDetail);
+
+routerAPI.get("/posts", getPosts);
+routerAPI.get("/posts/:slug", getPostDetail);
+
+routerAPI.get("/products", getProducts);
+routerAPI.get("/products/:slug", getProductDetail);
+
+routerAPI.use(authenticate);
+
 routerAPI.get("/account", delay, getAccount);
-routerAPI.get("/catalog/home", getHome);
-routerAPI.get("/catalog/categories", getCategories);
-routerAPI.get("/catalog/categories/:slug", getCategoryDetail);
-routerAPI.post("/catalog/categories", createCategory);
-routerAPI.put("/catalog/categories/:slug", updateCategory);
-routerAPI.delete("/catalog/categories/:slug", deleteCategory);
-routerAPI.get("/catalog/promotions", getPromotions);
-routerAPI.get("/catalog/promotions/:slug", getPromotionDetail);
-routerAPI.post("/catalog/promotions", createPromotion);
-routerAPI.put("/catalog/promotions/:slug", updatePromotion);
-routerAPI.delete("/catalog/promotions/:slug", deletePromotion);
-routerAPI.get("/catalog/posts", getPosts);
-routerAPI.get("/catalog/posts/:slug", getPostDetail);
-routerAPI.post("/catalog/posts", createPost);
-routerAPI.put("/catalog/posts/:slug", updatePost);
-routerAPI.delete("/catalog/posts/:slug", deletePost);
-routerAPI.get("/catalog/products", getProducts);
-routerAPI.get("/catalog/products/:slug", getProductDetail);
-routerAPI.post("/catalog/products", createProduct);
-routerAPI.put("/catalog/products/:slug", updateProduct);
-routerAPI.delete("/catalog/products/:slug", deleteProduct);
+
+routerAPI.get("/user", authorizeRoles('Admin'), getUser);
+routerAPI.get("/user/:id", authorizeRoles('Admin'), getUserDetail);
+routerAPI.put("/user/:id", authorizeRoles('Admin'), updateUser);
+routerAPI.delete("/user/:id", authorizeRoles('Admin'), deleteUser);
+
+routerAPI.post("/categories", authorizeRoles('Admin'), createCategory);
+routerAPI.put("/categories/:slug", authorizeRoles('Admin'), updateCategory);
+routerAPI.delete("/categories/:slug", authorizeRoles('Admin'), deleteCategory);
+
+routerAPI.post("/promotions", authorizeRoles('Admin'), createPromotion);
+routerAPI.put("/promotions/:slug", authorizeRoles('Admin'), updatePromotion);
+routerAPI.delete("/promotions/:slug", authorizeRoles('Admin'), deletePromotion);
+
+routerAPI.post("/posts", authorizeRoles('Admin'), createPost);
+routerAPI.put("/posts/:slug", authorizeRoles('Admin'), updatePost);
+routerAPI.delete("/posts/:slug", authorizeRoles('Admin'), deletePost);
+
+routerAPI.post("/products", authorizeRoles('Admin'), createProduct);
+routerAPI.put("/products/:slug", authorizeRoles('Admin'), updateProduct);
+routerAPI.delete("/products/:slug", authorizeRoles('Admin'), deleteProduct);
 
 module.exports = routerAPI;

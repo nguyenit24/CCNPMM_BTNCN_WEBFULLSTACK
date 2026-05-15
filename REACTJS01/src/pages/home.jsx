@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Card, Carousel, Spin, Tag, notification } from 'antd';
-import { LogoutOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { ThunderboltOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../components/context/auth.context';
 import { getHomeApi } from '../util/api';
 import ProductCard from '../components/catalog/product-card';
 import PostCard from '../components/catalog/post-card';
@@ -10,8 +9,6 @@ import PostCard from '../components/catalog/post-card';
 const HomePage = () => {
 
     const navigate = useNavigate();
-    const { auth, setAuth } = useContext(AuthContext);
-    const memberFallback = auth?.user || {};
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
 
@@ -36,19 +33,6 @@ const HomePage = () => {
         fetchHome();
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('access_token');
-        setAuth({
-            isAuthenticated: false,
-            user: {
-                email: '',
-                name: '',
-                role: 'Member',
-            },
-        });
-        navigate('/login');
-    };
-
     if (loading) {
         return (
             <div className="store-layout store-loading">
@@ -63,11 +47,10 @@ const HomePage = () => {
 
     const promotions = Array.isArray(data.promotions) ? data.promotions : [];
     const heroSlides = promotions.length > 0 ? promotions : [data.heroPromotion].filter(Boolean);
-    const member = data.member || memberFallback;
 
     return (
         <div className="store-layout home-page">
-            <section className="store-hero">
+            <section className="store-hero store-hero--solo">
                 <div className="store-hero__panel">
                     <Carousel autoplay dots>
                         {heroSlides.map((promo) => (
@@ -96,52 +79,6 @@ const HomePage = () => {
                             </div>
                         ))}
                     </Carousel>
-                </div>
-
-                <div className="store-hero__meta">
-                    <Card className="member-card" bordered={false}>
-                        <h2 className="member-card__title">Thông tin thành viên</h2>
-                        <div className="member-card__meta">
-                            <div className="member-card__row">
-                                <span>Họ tên</span>
-                                <strong>{member.name || 'Member'}</strong>
-                            </div>
-                            <div className="member-card__row">
-                                <span>Email</span>
-                                <strong>{member.email || '---'}</strong>
-                            </div>
-                            <div className="member-card__row">
-                                <span>Vai trò</span>
-                                <strong>{member.role || 'Member'}</strong>
-                            </div>
-                        </div>
-                        <div className="member-card__actions">
-                            <Button type="primary" icon={<LogoutOutlined />} onClick={handleLogout}>
-                                Đăng xuất
-                            </Button>
-                            <Button onClick={() => navigate('/products?featured=true')}>
-                                Xem sản phẩm nổi bật
-                            </Button>
-                        </div>
-                    </Card>
-
-                    <Card className="member-card" bordered={false}>
-                        <h2 className="member-card__title">Tóm tắt nhanh</h2>
-                        <div className="member-card__meta">
-                            <div className="member-card__row">
-                                <span>Danh mục</span>
-                                <strong>{data.categories?.length || 0}</strong>
-                            </div>
-                            <div className="member-card__row">
-                                <span>Sản phẩm mới</span>
-                                <strong>{data.newestProducts?.length || 0}</strong>
-                            </div>
-                            <div className="member-card__row">
-                                <span>Bán chạy</span>
-                                <strong>{data.bestSellerProducts?.length || 0}</strong>
-                            </div>
-                        </div>
-                    </Card>
                 </div>
             </section>
 
@@ -232,6 +169,7 @@ const HomePage = () => {
                         <h2 className="store-section__title">Tin mới nhất</h2>
                         <p className="store-section__subtitle">Bài viết ngắn giúp member chọn setup phù hợp hơn.</p>
                     </div>
+                    <Button onClick={() => navigate('/posts')}>Xem tất cả</Button>
                 </div>
 
                 <div className="store-grid--3">

@@ -11,6 +11,34 @@ const createUserApi = (name, email, password) => {
     return axios.post(URL_API, data)
 }
 
+const requestRegisterOtpApi = (data = {}) => {
+
+    const URL_API = "/v1/api/register/request-otp";
+
+    return axios.post(URL_API, data)
+}
+
+const verifyRegisterOtpApi = (data = {}) => {
+
+    const URL_API = "/v1/api/register/verify-otp";
+
+    return axios.post(URL_API, data)
+}
+
+const requestForgotPasswordOtpApi = (data = {}) => {
+
+    const URL_API = "/v1/api/forgot-password/request-otp";
+
+    return axios.post(URL_API, data)
+}
+
+const resetPasswordWithOtpApi = (data = {}) => {
+
+    const URL_API = "/v1/api/forgot-password/reset-password";
+
+    return axios.post(URL_API, data)
+}
+
 const loginApi = (email, password) => {
 
     const URL_API = "/v1/api/login";
@@ -206,6 +234,10 @@ const deletePostApi = (slug) => {
 
 export {
     createUserApi,
+    requestRegisterOtpApi,
+    verifyRegisterOtpApi,
+    requestForgotPasswordOtpApi,
+    resetPasswordWithOtpApi,
     loginApi,
     getUserApi,
     getUserDetailApi,

@@ -5,10 +5,13 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import { Spin } from "antd";
 import { getAccountApi } from "./util/api";
+import { useLocation } from "react-router-dom";
 
 function App() {
 
     const { setAuth, appLoading, setAppLoading } = useContext(AuthContext);
+    const location = useLocation();
+    const isAdminRoute = location.pathname.startsWith('/admin');
 
     useEffect(() => {
 
@@ -65,7 +68,7 @@ function App() {
                 :
 
                 <>
-                    <Header />
+                        {isAdminRoute ? null : <Header />}
                     <Outlet />
                 </>
             }

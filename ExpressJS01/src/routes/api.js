@@ -8,6 +8,13 @@ const {
     updateUser,
     deleteUser,
 } = require('../controllers/userController');
+const {
+    requestRegisterOtp,
+    verifyRegisterOtp,
+    requestForgotPasswordOtp,
+    resetPasswordWithOtp,
+} = require('../controllers/authOtpController');
+const { sendTestEmail } = require('../controllers/debugController');
 const { getHome } = require('../controllers/homeController');
 const {
     getCategories,
@@ -48,6 +55,11 @@ routerAPI.get("/", (req, res) => {
 
 routerAPI.post("/register", createUser);
 routerAPI.post("/login", handleLogin);
+routerAPI.post("/register/request-otp", requestRegisterOtp);
+routerAPI.post("/register/verify-otp", verifyRegisterOtp);
+routerAPI.post("/forgot-password/request-otp", requestForgotPasswordOtp);
+routerAPI.post("/forgot-password/reset-password", resetPasswordWithOtp);
+routerAPI.post('/debug/send-test-email', sendTestEmail);
 
 routerAPI.get("/home", getHome);
 

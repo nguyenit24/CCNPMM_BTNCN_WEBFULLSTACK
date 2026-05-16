@@ -15,6 +15,7 @@ import RegisterPage from './pages/register.jsx';
 import UserPage from './pages/user.jsx';
 import HomePage from './pages/home.jsx';
 import LoginPage from './pages/login.jsx';
+import ForgotPasswordPage from './pages/forgot-password.jsx';
 import ProductsPage from './pages/products.jsx';
 import ProductDetailPage from './pages/product-detail.jsx';
 import PostDetailPage from './pages/post-detail.jsx';
@@ -61,6 +62,7 @@ const router = createBrowserRouter(
             </Route>
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </>
     )
 );

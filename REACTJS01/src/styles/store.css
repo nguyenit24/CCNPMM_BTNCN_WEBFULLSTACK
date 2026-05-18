@@ -178,6 +178,21 @@ a {
   margin-bottom: 18px;
 }
 
+.store-section__head--pager {
+  align-items: center;
+}
+
+.store-section__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.store-section__page {
+  color: var(--store-muted);
+  font-weight: 700;
+}
+
 .store-section__title {
   margin: 0;
   font-size: 1.9rem;
@@ -211,6 +226,59 @@ a {
 
 .store-grid--5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.store-horizontal-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.store-horizontal-rail {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.store-horizontal-rail::-webkit-scrollbar {
+  height: 10px;
+}
+
+.store-horizontal-rail::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.4);
+}
+
+.store-horizontal-rail .catalog-product-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+}
+
+.store-category-card {
+  overflow: hidden;
+}
+
+.store-category-card .ant-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.store-category-card__media {
+  overflow: hidden;
+  border-radius: 20px;
+  background: #0f172a;
+  aspect-ratio: 4 / 3;
+}
+
+.store-category-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .store-hero {
@@ -809,6 +877,15 @@ a {
 
 .product-toolbar__sort {
   min-width: 180px;
+}
+
+.product-load-more {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 0;
+  color: var(--store-muted);
+  font-weight: 600;
 }
 
 .product-detail {
@@ -1471,6 +1548,14 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .store-horizontal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .store-horizontal-rail .catalog-product-card {
+    flex-basis: 260px;
+  }
+
   .post-list-item {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1506,6 +1591,14 @@ a {
   .store-grid--3,
   .store-grid--2 {
     grid-template-columns: 1fr;
+  }
+
+  .store-horizontal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .store-horizontal-rail .catalog-product-card {
+    flex-basis: 82vw;
   }
 
   .product-detail__spec {

@@ -4,6 +4,7 @@ import { createCategoryApi, deleteCategoryApi, getCategoriesApi, updateCategoryA
 import AdminCard from './admin-card';
 
 const { TextArea } = Input;
+const PAGE_SIZE = 8;
 
 const CategoriesAdmin = () => {
     const [form] = Form.useForm();
@@ -11,15 +12,23 @@ const CategoriesAdmin = () => {
     const [loading, setLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(PAGE_SIZE);
+    const [total, setTotal] = useState(0);
 
-    const loadCategories = async () => {
+    const loadCategories = async (nextPage = 1, nextPageSize = pageSize) => {
         setLoading(true);
-        const res = await getCategoriesApi();
+        const res = await getCategoriesApi({ page: nextPage, limit: nextPageSize });
         if (res?.message) {
             notification.error({ message: 'Load categories', description: res.message });
             setItems([]);
+            setTotal(0);
         } else {
-            setItems(Array.isArray(res) ? res : []);
+            const nextItems = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : [];
+            setItems(nextItems);
+            setTotal(Number(res?.total ?? nextItems.length));
+            setPage(nextPage);
+            setPageSize(nextPageSize);
         }
         setLoading(false);
     };
@@ -58,7 +67,7 @@ const CategoriesAdmin = () => {
             });
             setModalOpen(false);
             form.resetFields();
-            loadCategories();
+            loadCategories(page, pageSize);
         } catch (error) {
             notification.error({
                 message: editing ? 'Update category' : 'Create category',
@@ -74,7 +83,7 @@ const CategoriesAdmin = () => {
             return;
         }
         notification.success({ message: 'Delete category', description: 'Success' });
-        loadCategories();
+        loadCategories(page, pageSize);
     };
 
     const columns = [
@@ -100,14 +109,20 @@ const CategoriesAdmin = () => {
     ];
 
     return (
-        <AdminCard title="Categories" onReload={loadCategories} onCreate={openCreate}>
+        <AdminCard title="Categories" onReload={() => loadCategories(page, pageSize)} onCreate={openCreate}>
             <Table
                 className="admin-table"
                 rowKey="slug"
                 columns={columns}
                 dataSource={items}
                 loading={loading}
-                pagination={{ pageSize: 8 }}
+                pagination={{
+                    current: page,
+                    pageSize,
+                    total,
+                    showSizeChanger: false,
+                    onChange: (nextPage, nextPageSize) => loadCategories(nextPage, nextPageSize),
+                }}
             />
 
             <Modal

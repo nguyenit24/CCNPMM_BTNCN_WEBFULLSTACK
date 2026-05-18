@@ -17,7 +17,7 @@ const PostDetailPage = () => {
 
             if (res?.message && res.message !== 'Đã xảy ra lỗi máy chủ' && res.message !== 'Không tìm thấy bài viết') {
                 notification.error({
-                    message: 'Lấy chi tiết bài viết',
+                    message: 'Load post details',
                     description: res.message,
                 });
             }
@@ -38,7 +38,7 @@ const PostDetailPage = () => {
     }
 
     if (!data?.post) {
-        return <Result status="404" title="Không tìm thấy bài viết" />;
+        return <Result status="404" title="Post not found" />;
     }
 
     const { post, relatedPosts } = data;
@@ -47,9 +47,9 @@ const PostDetailPage = () => {
     return (
         <div className="store-layout post-detail">
             <div className="store-breadcrumb">
-                <Link to="/">Trang chủ</Link>
+                <Link to="/">Home</Link>
                 <span>/</span>
-                <Link to="/posts">Bài viết</Link>
+                <Link to="/posts">Posts</Link>
                 <span>/</span>
                 <span>{post.title}</span>
             </div>
@@ -60,7 +60,7 @@ const PostDetailPage = () => {
                     <Tag color="blue">{post.categoryName}</Tag>
                     <h1 className="post-detail__title">{post.title}</h1>
                     <p className="post-detail__meta">
-                        {new Date(post.publishedAt).toLocaleDateString('vi-VN')} · {post.readTime}
+                        {new Date(post.publishedAt).toLocaleDateString('en-US')} · {post.readTime}
                     </p>
                     <p className="post-detail__excerpt">{post.excerpt}</p>
                     {tags.length > 0 ? (
@@ -75,7 +75,7 @@ const PostDetailPage = () => {
             </article>
 
             <section className="post-detail__related-block content-card">
-                <h2 className="content-card__title">Bài viết liên quan</h2>
+                <h2 className="content-card__title">Related posts</h2>
                 {relatedPosts?.length > 0 ? (
                     <div className="store-grid--3">
                         {relatedPosts.map((item) => (
@@ -83,7 +83,7 @@ const PostDetailPage = () => {
                         ))}
                     </div>
                 ) : (
-                    <Empty description="Chưa có bài viết liên quan" />
+                    <Empty description="No related posts" />
                 )}
             </section>
         </div>

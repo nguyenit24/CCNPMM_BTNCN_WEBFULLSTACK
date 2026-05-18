@@ -70,7 +70,7 @@ const getProductsService = async (filters = {}) => {
 
 const getProductDetailService = async (slug) => {
     const [product, productCount] = await Promise.all([
-        Product.findOne({ slug }).lean(),
+        Product.findOneAndUpdate({ slug }, { $inc: { views: 1 } }, { new: true }).lean(),
         Product.countDocuments({}),
     ]);
 
@@ -99,6 +99,42 @@ const getProductDetailService = async (slug) => {
         category: categories.find((category) => category.slug === product.categorySlug) || null,
         similarProducts: similarProducts.map(decorateProduct),
         emptyCollection: productCount === 0,
+    };
+};
+
+const getTopProductsService = async (filters = {}) => {
+    const type = String(filters.type || '').trim();
+    const page = Math.max(Number(filters.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(filters.limit) || 5, 1), 10);
+    const skip = (page - 1) * limit;
+    const topLimit = 10;
+
+    const query = {};
+    let sort = { sold: -1, rating: -1, releasedAt: -1 };
+
+    if (type === 'bestSeller') {
+        query.bestSeller = true;
+        sort = { sold: -1, rating: -1, releasedAt: -1 };
+    }
+
+    if (type === 'mostViewed') {
+        sort = { views: -1, sold: -1, rating: -1, releasedAt: -1 };
+    }
+
+    const totalRaw = await Product.countDocuments(query);
+    const total = Math.min(totalRaw, topLimit);
+    const cappedSkip = Math.min(skip, topLimit);
+    const cappedLimit = Math.max(Math.min(limit, topLimit - cappedSkip), 0);
+
+    const items = cappedLimit > 0
+        ? await Product.find(query).sort(sort).skip(cappedSkip).limit(cappedLimit).lean()
+        : [];
+
+    return {
+        items: items.map(decorateProduct),
+        total,
+        page,
+        limit,
     };
 };
 
@@ -321,6 +357,7 @@ const deleteProductService = async (slug) => {
 module.exports = {
     getProductsService,
     getProductDetailService,
+    getTopProductsService,
     createProductService,
     updateProductService,
     deleteProductService,

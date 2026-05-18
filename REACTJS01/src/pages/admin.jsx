@@ -13,28 +13,28 @@ import { normalizeCollection } from '../components/admin/admin-utils';
 
 const sectionMeta = {
     overview: {
-        label: 'Tổng quan',
-        description: 'Theo dõi nhanh dữ liệu backend ExpressJS và mở từng CRUD theo từng nhóm nội dung.',
+        label: 'Overview',
+        description: 'Quickly review ExpressJS backend data and open each CRUD section by content group.',
     },
     users: {
-        label: 'Người dùng',
-        description: 'Quản lý tài khoản, vai trò và quyền truy cập trong hệ thống.',
+        label: 'Users',
+        description: 'Manage accounts, roles, and access permissions.',
     },
     categories: {
-        label: 'Danh mục',
-        description: 'CRUD danh mục đồng bộ với sản phẩm và bài viết.',
+        label: 'Categories',
+        description: 'CRUD categories synced with products and posts.',
     },
     promotions: {
-        label: 'Khuyến mãi',
-        description: 'CRUD banner và chương trình ưu đãi trên trang chủ.',
+        label: 'Promotions',
+        description: 'CRUD banners and offers on the homepage.',
     },
     products: {
-        label: 'Sản phẩm',
-        description: 'CRUD toàn bộ catalog sản phẩm theo API hiện có.',
+        label: 'Products',
+        description: 'CRUD the full product catalog with the existing API.',
     },
     posts: {
-        label: 'Bài viết',
-        description: 'CRUD nội dung blog và tin tức cho storefront.',
+        label: 'Posts',
+        description: 'CRUD blog and news content for the storefront.',
     },
 };
 

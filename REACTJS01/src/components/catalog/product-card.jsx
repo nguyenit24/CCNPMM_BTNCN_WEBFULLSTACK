@@ -19,7 +19,7 @@ const ProductCard = ({ product, compact = false }) => {
                 <div className="catalog-product-card__badges">
                     {product.isNew ? <Tag color="blue">New</Tag> : null}
                     {product.onSale && product.salePercent > 0 ? <Tag color="volcano">-{product.salePercent}%</Tag> : null}
-                    {product.bestSeller ? <Tag color="green">Bán chạy</Tag> : null}
+                    {product.bestSeller ? <Tag color="green">Best seller</Tag> : null}
                 </div>
             </div>
             <div className="catalog-product-card__body">
@@ -33,12 +33,12 @@ const ProductCard = ({ product, compact = false }) => {
                     ) : null}
                 </div>
                 <div className="catalog-product-card__meta">
-                    <span>{product.stock} tồn kho</span>
-                    <span>{product.sold} đã bán</span>
+                    <span>{product.stock} in stock</span>
+                    <span>{product.sold} sold</span>
                 </div>
                 <div className="catalog-product-card__footer">
                     <span className="catalog-product-card__rating"><StarFilled /> {Number(product.rating || 0).toFixed(1)}</span>
-                    <span className="catalog-product-card__cta">Xem chi tiết</span>
+                    <span className="catalog-product-card__cta">View details</span>
                 </div>
             </div>
         </Link>

@@ -45,12 +45,12 @@ const Header = () => {
             return [
                 {
                     key: 'login',
-                    label: <Link to="/login">Đăng nhập</Link>,
+                    label: <Link to="/login">Login</Link>,
                     icon: <LoginOutlined />,
                 },
                 {
                     key: 'register',
-                    label: <Link to="/register">Đăng ký</Link>,
+                    label: <Link to="/register">Register</Link>,
                     icon: <AppstoreOutlined />,
                 },
             ];
@@ -71,7 +71,7 @@ const Header = () => {
                 key: 'logout',
                 label: (
                     <span onClick={handleLogout}>
-                        <LogoutOutlined /> Đăng xuất
+                        <LogoutOutlined /> Logout
                     </span>
                 ),
             },
@@ -96,16 +96,16 @@ const Header = () => {
                     <HomeOutlined /> Home
                 </NavLink>
                 <NavLink to="/products" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
-                    Sản phẩm
+                    Products
                 </NavLink>
                 <NavLink to="/products?featured=true" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
-                    Danh mục
+                    Categories
                 </NavLink>
                 <NavLink to="/products?onSale=true" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                     Deals
                 </NavLink>
                 <NavLink to="/posts" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
-                    Bài viết
+                    Posts
                 </NavLink>
                 {showAdminLink ? (
                     <NavLink to="/admin" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
@@ -117,7 +117,7 @@ const Header = () => {
             <Input.Search
                 allowClear
                 className="store-header__search"
-                placeholder="Tìm sản phẩm..."
+                placeholder="Search products..."
                 prefix={<SearchOutlined />}
                 value={searchValue}
                 onChange={(event) => setSearchValue(event.target.value)}
@@ -139,7 +139,7 @@ const Header = () => {
                     </Space>
                 ) : (
                     <Button type="primary" onClick={() => navigate('/login')}>
-                        Đăng nhập
+                        Login
                     </Button>
                 )}
             </div>

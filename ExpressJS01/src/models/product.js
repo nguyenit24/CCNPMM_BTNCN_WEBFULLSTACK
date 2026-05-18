@@ -12,6 +12,7 @@ const productSchema = new mongoose.Schema(
         compareAtPrice: { type: Number, default: 0 },
         stock: { type: Number, default: 0 },
         sold: { type: Number, default: 0 },
+        views: { type: Number, default: 0 },
         rating: { type: Number, default: 0 },
         images: { type: [String], default: [] },
         tags: { type: [String], default: [] },

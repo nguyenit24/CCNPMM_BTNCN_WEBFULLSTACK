@@ -34,8 +34,8 @@ const ProfilePage = () => {
                         {initials}
                     </div>
                     <div>
-                        <h1 style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: '700' }}>Hồ sơ cá nhân</h1>
-                        <p style={{ margin: 0, color: '#64748b' }}>Quản lý thông tin tài khoản của bạn</p>
+                        <h1 style={{ margin: '0 0 4px', fontSize: '24px', fontWeight: '700' }}>Profile</h1>
+                        <p style={{ margin: 0, color: '#64748b' }}>Manage your account information</p>
                     </div>
                 </div>
             </div>
@@ -45,7 +45,7 @@ const ProfilePage = () => {
                     <Card 
                         title={
                             <span style={{ fontSize: '16px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <IdcardOutlined /> Thông tin cá nhân
+                                <IdcardOutlined /> Personal information
                             </span>
                         }
                         bordered={false}
@@ -58,7 +58,7 @@ const ProfilePage = () => {
                         <div style={{ display: 'grid', gap: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
-                                    <UserOutlined /> Họ tên
+                                    <UserOutlined /> Full name
                                 </span>
                                 <strong>{user.name || '---'}</strong>
                             </div>
@@ -72,7 +72,7 @@ const ProfilePage = () => {
                             <Divider style={{ margin: 0 }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b' }}>
-                                    <IdcardOutlined /> Vai trò
+                                    <IdcardOutlined /> Role
                                 </span>
                                 <Tag color="blue">{user.role || 'Member'}</Tag>
                             </div>
@@ -83,7 +83,7 @@ const ProfilePage = () => {
                 <Col xs={24} md={12}>
                     <Card 
                         title={
-                            <span style={{ fontSize: '16px', fontWeight: '700' }}>Thao tác nhanh</span>
+                            <span style={{ fontSize: '16px', fontWeight: '700' }}>Quick actions</span>
                         }
                         bordered={false}
                         style={{
@@ -100,7 +100,7 @@ const ProfilePage = () => {
                                 onClick={() => navigate('/')}
                                 block
                             >
-                                Về trang chủ
+                                Back to home
                             </Button>
                             <Button 
                                 size="large" 
@@ -108,7 +108,7 @@ const ProfilePage = () => {
                                 onClick={() => navigate('/products')}
                                 block
                             >
-                                Xem sản phẩm
+                                Browse products
                             </Button>
                         </div>
                     </Card>

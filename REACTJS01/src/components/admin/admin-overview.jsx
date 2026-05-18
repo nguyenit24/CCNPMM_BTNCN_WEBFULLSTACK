@@ -21,41 +21,41 @@ const AdminOverview = ({ stats, loading, onOpenSection }) => (
     <div className="admin-overview">
         <div className="admin-metrics-grid">
             <AdminMetricCard
-                label="Người dùng"
+                label="Users"
                 value={stats.users}
-                helper="Danh sách tài khoản từ API /user"
+                helper="User accounts from the /user API"
                 icon={<TeamOutlined />}
                 color="linear-gradient(135deg, #2563eb, #38bdf8)"
                 loading={loading}
             />
             <AdminMetricCard
-                label="Danh mục"
+                label="Categories"
                 value={stats.categories}
-                helper="Categories quản lý taxonomy"
+                helper="Taxonomy management"
                 icon={<AppstoreOutlined />}
                 color="linear-gradient(135deg, #0f766e, #34d399)"
                 loading={loading}
             />
             <AdminMetricCard
-                label="Khuyến mãi"
+                label="Promotions"
                 value={stats.promotions}
-                helper="Các banner active trên homepage"
+                helper="Active homepage banners"
                 icon={<BarChartOutlined />}
                 color="linear-gradient(135deg, #ea580c, #f59e0b)"
                 loading={loading}
             />
             <AdminMetricCard
-                label="Sản phẩm"
+                label="Products"
                 value={stats.products}
-                helper="Tổng số catalog product"
+                helper="Total catalog products"
                 icon={<ShoppingOutlined />}
                 color="linear-gradient(135deg, #7c3aed, #a78bfa)"
                 loading={loading}
             />
             <AdminMetricCard
-                label="Bài viết"
+                label="Posts"
                 value={stats.posts}
-                helper="Bài viết tin tức & tư vấn"
+                helper="News and advice articles"
                 icon={<FileTextOutlined />}
                 color="linear-gradient(135deg, #14b8a6, #22c55e)"
                 loading={loading}
@@ -63,13 +63,13 @@ const AdminOverview = ({ stats, loading, onOpenSection }) => (
         </div>
 
         <div className="admin-overview__grid">
-            <Card className="admin-overview__panel" bordered={false} title="Tổng hợp nhanh">
+            <Card className="admin-overview__panel" bordered={false} title="Quick actions">
                 <div className="admin-shortcuts">
-                    <Button onClick={() => onOpenSection('users')}>Người dùng</Button>
-                    <Button onClick={() => onOpenSection('categories')}>Danh mục</Button>
-                    <Button onClick={() => onOpenSection('promotions')}>Khuyến mãi</Button>
-                    <Button onClick={() => onOpenSection('products')}>Sản phẩm</Button>
-                    <Button onClick={() => onOpenSection('posts')}>Bài viết</Button>
+                    <Button onClick={() => onOpenSection('users')}>Users</Button>
+                    <Button onClick={() => onOpenSection('categories')}>Categories</Button>
+                    <Button onClick={() => onOpenSection('promotions')}>Promotions</Button>
+                    <Button onClick={() => onOpenSection('products')}>Products</Button>
+                    <Button onClick={() => onOpenSection('posts')}>Posts</Button>
                 </div>
             </Card>
         </div>

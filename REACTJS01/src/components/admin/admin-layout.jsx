@@ -11,12 +11,12 @@ import {
 } from '@ant-design/icons';
 
 const adminMenuItems = [
-    { key: 'overview', icon: <DashboardOutlined />, label: 'Tổng quan' },
-    { key: 'users', icon: <TeamOutlined />, label: 'Người dùng' },
-    { key: 'categories', icon: <AppstoreOutlined />, label: 'Danh mục' },
-    { key: 'promotions', icon: <BarChartOutlined />, label: 'Khuyến mãi' },
-    { key: 'products', icon: <ShoppingOutlined />, label: 'Sản phẩm' },
-    { key: 'posts', icon: <FileTextOutlined />, label: 'Bài viết' },
+    { key: 'overview', icon: <DashboardOutlined />, label: 'Overview' },
+    { key: 'users', icon: <TeamOutlined />, label: 'Users' },
+    { key: 'categories', icon: <AppstoreOutlined />, label: 'Categories' },
+    { key: 'promotions', icon: <BarChartOutlined />, label: 'Promotions' },
+    { key: 'products', icon: <ShoppingOutlined />, label: 'Products' },
+    { key: 'posts', icon: <FileTextOutlined />, label: 'Posts' },
 ];
 
 const AdminLayout = ({
@@ -56,8 +56,8 @@ const AdminLayout = ({
                     </Space>
                 </Card>
 
-                <Button type="primary" icon={<ReloadOutlined />} block onClick={onRefresh} loading={refreshing}>
-                    Làm mới dashboard
+                        <Button type="primary" icon={<ReloadOutlined />} block onClick={onRefresh} loading={refreshing}>
+                    Refresh dashboard
                 </Button>
 
                 <Menu
@@ -70,11 +70,11 @@ const AdminLayout = ({
 
                 <div className="admin-sider__footer">
                     <div className="admin-sider__footer-meta">
-                        <span>Đã đăng nhập</span>
+                        <span>Signed in</span>
                         <strong>{auth?.user?.role || 'Admin'}</strong>
                     </div>
                     <Button danger block onClick={onLogout} className="admin-sider__logout">
-                        Đăng xuất
+                        Logout
                     </Button>
                 </div>
             </Layout.Sider>
@@ -89,10 +89,10 @@ const AdminLayout = ({
 
                     <Space wrap>
                         <Button onClick={onRefresh} loading={refreshing}>
-                            Tải số liệu
+                            Reload metrics
                         </Button>
                         <Button type="primary" onClick={() => onSectionChange('overview')}>
-                            Tổng quan
+                            Overview
                         </Button>
                     </Space>
                 </div>

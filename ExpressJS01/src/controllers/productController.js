@@ -1,6 +1,7 @@
 const {
     getProductsService,
     getProductDetailService,
+    getTopProductsService,
     createProductService,
     updateProductService,
     deleteProductService,
@@ -28,6 +29,21 @@ const getProductDetail = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
         }
 
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Đã xảy ra lỗi máy chủ' });
+    }
+};
+
+const getTopProducts = async (req, res) => {
+    try {
+        const type = String(req.query.type || '').trim();
+        if (!['bestSeller', 'mostViewed'].includes(type)) {
+            return res.status(400).json({ message: 'Loại thống kê không hợp lệ' });
+        }
+
+        const data = await getTopProductsService(req.query);
         return res.status(200).json(data);
     } catch (error) {
         console.log(error);
@@ -74,6 +90,7 @@ const deleteProduct = async (req, res) => {
 module.exports = {
     getProducts,
     getProductDetail,
+    getTopProducts,
     createProduct,
     updateProduct,
     deleteProduct,

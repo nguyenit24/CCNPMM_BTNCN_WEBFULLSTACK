@@ -27,7 +27,7 @@ const ProductDetailPage = () => {
 
             if (res?.message && res.message !== 'Đã xảy ra lỗi máy chủ' && res.message !== 'Không tìm thấy sản phẩm') {
                 notification.error({
-                    message: 'Lấy chi tiết sản phẩm',
+                    message: 'Load product details',
                     description: res.message,
                 });
             }
@@ -48,7 +48,7 @@ const ProductDetailPage = () => {
     }
 
     if (!data?.product) {
-        return <Result status="404" title="Không tìm thấy sản phẩm" />;
+        return <Result status="404" title="Product not found" />;
     }
 
     const { product, category, similarProducts } = data;
@@ -67,9 +67,9 @@ const ProductDetailPage = () => {
     return (
         <div className="store-layout">
             <div className="store-breadcrumb">
-                <Link to="/">Trang chủ</Link>
+                <Link to="/">Home</Link>
                 <span>/</span>
-                <Link to="/products">Sản phẩm</Link>
+                <Link to="/products">Products</Link>
                 <span>/</span>
                 <span>{product.name}</span>
             </div>
@@ -85,7 +85,7 @@ const ProductDetailPage = () => {
                                     alt={`${product.name} ${safeActiveIndex + 1}`}
                                 />
                             ) : (
-                                <div className="product-gallery__placeholder">Chưa có ảnh sản phẩm</div>
+                                <div className="product-gallery__placeholder">No product images available</div>
                             )}
                         </div>
                         {images.length > 1 ? (
@@ -109,8 +109,8 @@ const ProductDetailPage = () => {
                 <div className="product-detail__info">
                     <div className="product-detail__tags">
                         <Tag color="blue">{category?.name || product.categoryName}</Tag>
-                        {product.isNew ? <Tag color="gold">Mới</Tag> : null}
-                        {product.onSale ? <Tag color="red">Khuyến mãi</Tag> : null}
+                        {product.isNew ? <Tag color="gold">New</Tag> : null}
+                        {product.onSale ? <Tag color="red">Sale</Tag> : null}
                     </div>
 
                     <h1 className="product-detail__title">{product.name}</h1>
@@ -129,20 +129,20 @@ const ProductDetailPage = () => {
                     <div className="product-detail__meta">
                         <div className="product-detail__meta-item">
                             <strong>{product.stock}</strong>
-                            <span>Tồn kho</span>
+                            <span>In stock</span>
                         </div>
                         <div className="product-detail__meta-item">
                             <strong>{product.sold}</strong>
-                            <span>Đã bán</span>
+                            <span>Sold</span>
                         </div>
                         <div className="product-detail__meta-item">
                             <strong><StarFilled /> {Number(product.rating || 0).toFixed(1)}</strong>
-                            <span>Đánh giá</span>
+                            <span>Rating</span>
                         </div>
                     </div>
 
                     <div className="product-detail__quantity">
-                        <span>Số lượng</span>
+                        <span>Quantity</span>
                         <div className="quantity-stepper">
                             <Button icon={<MinusOutlined />} onClick={() => setQuantity((value) => Math.max(1, value - 1))} disabled={quantity <= 1} />
                             <span className="quantity-stepper__value">{quantity}</span>
@@ -151,7 +151,7 @@ const ProductDetailPage = () => {
                     </div>
 
                     <div className="product-detail__stock-note">
-                        {isOutOfStock ? 'Hết hàng' : `Còn ${product.stock} sản phẩm trong kho`}
+                        {isOutOfStock ? 'Out of stock' : `${product.stock} items left in stock`}
                     </div>
 
                 </div>
@@ -160,14 +160,14 @@ const ProductDetailPage = () => {
             <div className="product-detail__content">
                 <div className="product-detail__summary">
                     <div className="content-card">
-                        <h2 className="content-card__title">Mô tả sản phẩm</h2>
+                        <h2 className="content-card__title">Product description</h2>
                         {fullDescription ? <p className="content-card__text">{fullDescription}</p> : null}
                         <p className="content-card__text">
-                            Sản phẩm thuộc danh mục <strong>{category?.name || product.categoryName}</strong> và phù hợp cho member muốn một bộ thiết bị gọn, cao cấp, tập trung vào trải nghiệm thực tế.
+                            This product belongs to <strong>{category?.name || product.categoryName}</strong> and is a good fit for members who want a compact, premium setup focused on real-world experience.
                         </p>
                     </div>
                     <div className="content-card product-detail__spec-card">
-                        <h2 className="content-card__title">Thông số kỹ thuật</h2>
+                        <h2 className="content-card__title">Specifications</h2>
                         {specs.length > 0 ? (
                             <dl className="product-detail__specs">
                                 {specs.map((spec, index) => (
@@ -178,13 +178,13 @@ const ProductDetailPage = () => {
                                 ))}
                             </dl>
                         ) : (
-                            <p className="product-detail__spec-empty">Chưa có thông số kỹ thuật.</p>
+                            <p className="product-detail__spec-empty">No specifications available.</p>
                         )}
                     </div>
                 </div>
 
                 <div className="content-card">
-                    <h2 className="content-card__title">Sản phẩm tương tự</h2>
+                    <h2 className="content-card__title">Similar products</h2>
                     {similarProducts?.length > 0 ? (
                         <div className="store-grid--4">
                             {similarProducts.map((item) => (
@@ -192,7 +192,7 @@ const ProductDetailPage = () => {
                             ))}
                         </div>
                     ) : (
-                        <Empty description="Chưa có sản phẩm tương tự" />
+                            <Empty description="No similar products" />
                     )}
                 </div>
             </div>

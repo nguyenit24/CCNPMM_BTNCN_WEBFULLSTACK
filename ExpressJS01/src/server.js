@@ -19,8 +19,20 @@ const { checkRedisConnection } = require('./config/redis');
 
 const app = express();
 const port = process.env.PORT || 8888;
+const allowedOrigins = String(process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
-app.use(cors());
+app.use(cors({
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error('Not allowed by CORS'));
+    },
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

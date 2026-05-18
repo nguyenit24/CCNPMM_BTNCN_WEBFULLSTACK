@@ -9,8 +9,28 @@ const createError = (status, message) => {
     return error;
 };
 
-const getCategoriesService = async () => {
-    return Category.find({}).sort({ order: 1, name: 1 }).lean();
+const getCategoriesService = async (filters = {}) => {
+    const pageProvided = filters.page !== undefined || filters.limit !== undefined;
+
+    if (!pageProvided) {
+        return Category.find({}).sort({ order: 1, name: 1 }).lean();
+    }
+
+    const page = Math.max(Number(filters.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(filters.limit) || 12, 1), 50);
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await Promise.all([
+        Category.find({}).sort({ order: 1, name: 1 }).skip(skip).limit(limit).lean(),
+        Category.countDocuments({}),
+    ]);
+
+    return {
+        items,
+        total,
+        page,
+        limit,
+    };
 };
 
 const getCategoryDetailService = async (slug) => {

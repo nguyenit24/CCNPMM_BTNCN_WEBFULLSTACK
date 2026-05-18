@@ -17,7 +17,7 @@ const PostCard = ({ post, compact = false }) => {
                 <h3 className="catalog-post-card__title">{post.title}</h3>
                 <p className="catalog-post-card__excerpt">{post.excerpt}</p>
                 <div className="catalog-post-card__meta">
-                    <span>{new Date(post.publishedAt).toLocaleDateString('vi-VN')}</span>
+                    <span>{new Date(post.publishedAt).toLocaleDateString('en-US')}</span>
                     <span><ClockCircleOutlined /> {post.readTime}</span>
                 </div>
             </div>

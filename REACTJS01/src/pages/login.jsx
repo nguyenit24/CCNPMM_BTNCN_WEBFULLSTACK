@@ -19,8 +19,8 @@ const LoginPage = () => {
             localStorage.setItem('access_token', res.access_token);
 
             notification.success({
-                message: 'Đăng nhập thành công',
-                description: 'Chào mừng bạn quay lại TechStudio',
+                message: 'Login successful',
+                description: 'Welcome back to TechStudio',
             });
 
             setAuth({
@@ -35,7 +35,7 @@ const LoginPage = () => {
             navigate('/');
         } else {
             notification.error({
-                message: 'Đăng nhập thất bại',
+                message: 'Login failed',
                 description: res?.EM ?? 'error',
             });
         }
@@ -43,45 +43,45 @@ const LoginPage = () => {
 
     return (
         <AuthLayout
-            title="Đăng nhập"
+            title="Login"
             footer={(
                 <Space direction="vertical" size={10} className="auth-card__footer-block">
                     <div className="auth-card__links auth-card__links--single">
                         <Link to="/">
-                            <ArrowLeftOutlined /> Quay lại trang chủ
+                            <ArrowLeftOutlined /> Back to home
                         </Link>
-                        <Link to="/forgot-password">Quên mật khẩu?</Link>
+                        <Link to="/forgot-password">Forgot password?</Link>
                     </div>
                     <div className="auth-card__footer" style={{ textAlign: 'center' }}>
-                        Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
+                        No account yet? <Link to="/register">Register now</Link>
                     </div>
                 </Space>
             )}
         >
             <div className="auth-card__head">
-                <h2 className="auth-card__title">Đăng nhập tài khoản</h2>
+                <h2 className="auth-card__title">Sign in to your account</h2>
             </div>
 
             <Form form={form} name="login-form" onFinish={onFinish} autoComplete="off" layout="vertical" size="large">
                 <Form.Item
                     label="Email"
                     name="email"
-                    rules={[{ required: true, message: 'Vui lòng nhập email' }]}
+                    rules={[{ required: true, message: 'Please enter your email' }]}
                 >
                     <Input prefix={<MailOutlined />} placeholder="your@email.com" />
                 </Form.Item>
 
                 <Form.Item
-                    label="Mật khẩu"
+                    label="Password"
                     name="password"
-                    rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+                    rules={[{ required: true, message: 'Please enter your password' }]}
                 >
-                    <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
+                    <Input.Password prefix={<LockOutlined />} placeholder="Enter your password" />
                 </Form.Item>
 
                 <Form.Item className="auth-form__submit">
                     <Button type="primary" htmlType="submit" block className="auth-gradient-btn">
-                        Đăng nhập
+                        Sign in
                     </Button>
                 </Form.Item>
             </Form>

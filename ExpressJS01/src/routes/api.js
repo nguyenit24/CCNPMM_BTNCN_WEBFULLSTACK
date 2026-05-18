@@ -40,6 +40,7 @@ const {
 const {
     getProducts,
     getProductDetail,
+    getTopProducts,
     createProduct,
     updateProduct,
     deleteProduct,
@@ -73,6 +74,7 @@ routerAPI.get("/posts", getPosts);
 routerAPI.get("/posts/:slug", getPostDetail);
 
 routerAPI.get("/products", getProducts);
+routerAPI.get("/products/top", getTopProducts);
 routerAPI.get("/products/:slug", getProductDetail);
 
 routerAPI.use(authenticate);

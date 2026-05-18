@@ -5,6 +5,7 @@ import AdminCard from './admin-card';
 import { joinList, splitList } from './admin-utils';
 
 const { TextArea } = Input;
+const PAGE_SIZE = 8;
 
 const PostsAdmin = () => {
     const [form] = Form.useForm();
@@ -12,15 +13,22 @@ const PostsAdmin = () => {
     const [loading, setLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(PAGE_SIZE);
+    const [total, setTotal] = useState(0);
 
-    const loadPosts = async () => {
+    const loadPosts = async (nextPage = 1, nextPageSize = pageSize) => {
         setLoading(true);
-        const res = await getPostsApi({ limit: 24, page: 1 });
+        const res = await getPostsApi({ limit: nextPageSize, page: nextPage });
         if (res?.message) {
             notification.error({ message: 'Load posts', description: res.message });
             setItems([]);
+            setTotal(0);
         } else {
             setItems(Array.isArray(res?.items) ? res.items : []);
+            setTotal(Number(res?.total ?? 0));
+            setPage(nextPage);
+            setPageSize(nextPageSize);
         }
         setLoading(false);
     };
@@ -72,7 +80,7 @@ const PostsAdmin = () => {
             });
             setModalOpen(false);
             form.resetFields();
-            loadPosts();
+            loadPosts(page, pageSize);
         } catch (error) {
             notification.error({
                 message: editing ? 'Update post' : 'Create post',
@@ -88,7 +96,7 @@ const PostsAdmin = () => {
             return;
         }
         notification.success({ message: 'Delete post', description: 'Success' });
-        loadPosts();
+        loadPosts(page, pageSize);
     };
 
     const columns = [
@@ -119,14 +127,20 @@ const PostsAdmin = () => {
     ];
 
     return (
-        <AdminCard title="Posts" onReload={loadPosts} onCreate={openCreate}>
+        <AdminCard title="Posts" onReload={() => loadPosts(page, pageSize)} onCreate={openCreate}>
             <Table
                 className="admin-table"
                 rowKey="slug"
                 columns={columns}
                 dataSource={items}
                 loading={loading}
-                pagination={{ pageSize: 8 }}
+                pagination={{
+                    current: page,
+                    pageSize,
+                    total,
+                    showSizeChanger: false,
+                    onChange: (nextPage, nextPageSize) => loadPosts(nextPage, nextPageSize),
+                }}
                 scroll={{ x: true }}
             />
 

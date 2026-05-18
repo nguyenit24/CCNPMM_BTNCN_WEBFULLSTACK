@@ -6,6 +6,7 @@ import AdminCard from './admin-card';
 import { joinList, splitList } from './admin-utils';
 
 const { TextArea } = Input;
+const PAGE_SIZE = 8;
 
 const normalizeImageRows = (rows = []) => rows.map((row) => String(row?.url || '').trim()).filter(Boolean);
 
@@ -37,15 +38,22 @@ const ProductsAdmin = () => {
     const [loading, setLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(PAGE_SIZE);
+    const [total, setTotal] = useState(0);
 
-    const loadProducts = async () => {
+    const loadProducts = async (nextPage = 1, nextPageSize = pageSize) => {
         setLoading(true);
-        const res = await getProductsApi({ limit: 24, page: 1 });
+        const res = await getProductsApi({ limit: nextPageSize, page: nextPage });
         if (res?.message) {
             notification.error({ message: 'Load products', description: res.message });
             setItems([]);
+            setTotal(0);
         } else {
             setItems(Array.isArray(res?.items) ? res.items : []);
+            setTotal(Number(res?.total ?? 0));
+            setPage(nextPage);
+            setPageSize(nextPageSize);
         }
         setLoading(false);
     };
@@ -111,7 +119,7 @@ const ProductsAdmin = () => {
             });
             setModalOpen(false);
             form.resetFields();
-            loadProducts();
+            loadProducts(page, pageSize);
         } catch (error) {
             notification.error({
                 message: editing ? 'Update product' : 'Create product',
@@ -127,7 +135,7 @@ const ProductsAdmin = () => {
             return;
         }
         notification.success({ message: 'Delete product', description: 'Success' });
-        loadProducts();
+        loadProducts(page, pageSize);
     };
 
     const columns = [
@@ -171,14 +179,20 @@ const ProductsAdmin = () => {
     ];
 
     return (
-        <AdminCard title="Products" onReload={loadProducts} onCreate={openCreate}>
+        <AdminCard title="Products" onReload={() => loadProducts(page, pageSize)} onCreate={openCreate}>
             <Table
                 className="admin-table"
                 rowKey="slug"
                 columns={columns}
                 dataSource={items}
                 loading={loading}
-                pagination={{ pageSize: 8 }}
+                pagination={{
+                    current: page,
+                    pageSize,
+                    total,
+                    showSizeChanger: false,
+                    onChange: (nextPage, nextPageSize) => loadProducts(nextPage, nextPageSize),
+                }}
                 scroll={{ x: true }}
             />
 
@@ -251,9 +265,9 @@ const ProductsAdmin = () => {
                         {(fields, { add, remove }) => (
                             <div className="admin-form-list admin-form__wide">
                                 <div className="admin-form-list__head">
-                                    <span>Images URL</span>
+                                    <span>Image URLs</span>
                                     <Button size="small" type="primary" ghost icon={<PlusOutlined />} onClick={() => add({ url: '' })}>
-                                        Thêm ảnh
+                                        Add image
                                     </Button>
                                 </div>
                                 {fields.map((field, index) => (
@@ -262,7 +276,7 @@ const ProductsAdmin = () => {
                                             {...field}
                                             name={[field.name, 'url']}
                                             fieldKey={[field.fieldKey, 'url']}
-                                            label={index === 0 ? 'Link ảnh' : ''}
+                                            label={index === 0 ? 'Image link' : ''}
                                             className="admin-form-list__field"
                                         >
                                             <Input placeholder="https://..." />
@@ -277,9 +291,9 @@ const ProductsAdmin = () => {
                         {(fields, { add, remove }) => (
                             <div className="admin-form-list admin-form__wide">
                                 <div className="admin-form-list__head">
-                                    <span>Thông số kỹ thuật</span>
+                                    <span>Specifications</span>
                                     <Button size="small" type="primary" ghost icon={<PlusOutlined />} onClick={() => add({ label: '', value: '' })}>
-                                        Thêm dòng
+                                        Add row
                                     </Button>
                                 </div>
                                 {fields.map((field, index) => (
@@ -288,7 +302,7 @@ const ProductsAdmin = () => {
                                             {...field}
                                             name={[field.name, 'label']}
                                             fieldKey={[field.fieldKey, 'label']}
-                                            label={index === 0 ? 'Tên' : ''}
+                                            label={index === 0 ? 'Label' : ''}
                                             className="admin-form-list__field"
                                         >
                                             <Input placeholder="Battery" />
@@ -297,7 +311,7 @@ const ProductsAdmin = () => {
                                             {...field}
                                             name={[field.name, 'value']}
                                             fieldKey={[field.fieldKey, 'value']}
-                                            label={index === 0 ? 'Giá trị' : ''}
+                                            label={index === 0 ? 'Value' : ''}
                                             className="admin-form-list__field"
                                         >
                                             <Input placeholder="20h" />

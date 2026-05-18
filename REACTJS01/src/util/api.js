@@ -169,6 +169,13 @@ const getProductsApi = (params = {}) => {
     return axios.get(URL_API, { params })
 }
 
+const getTopProductsApi = (params = {}) => {
+
+    const URL_API = "/v1/api/products/top";
+
+    return axios.get(URL_API, { params })
+}
+
 const createProductApi = (data = {}) => {
 
     const URL_API = "/v1/api/products";
@@ -256,6 +263,7 @@ export {
     updatePromotionApi,
     deletePromotionApi,
     getProductsApi,
+    getTopProductsApi,
     createProductApi,
     updateProductApi,
     deleteProductApi,

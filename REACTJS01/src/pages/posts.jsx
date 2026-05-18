@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 import { getPostsApi } from '../util/api';
 
 const sortOptions = [
-    { value: 'newest', label: 'Mới nhất' },
-    { value: 'oldest', label: 'Cũ nhất' },
+    { value: 'newest', label: 'Newest' },
+    { value: 'oldest', label: 'Oldest' },
 ];
 
 const PostsPage = () => {
@@ -23,7 +23,7 @@ const PostsPage = () => {
 
             if (res?.message && res.message !== 'Đã xảy ra lỗi máy chủ') {
                 notification.error({
-                    message: 'Lấy danh sách bài viết',
+                    message: 'Load posts',
                     description: res.message,
                 });
             }
@@ -43,17 +43,17 @@ const PostsPage = () => {
         <div className="store-layout">
             <div className="store-page-head">
                 <div>
-                    <p className="store-page-head__eyebrow">Nội dung & tư vấn</p>
-                    <h1 className="store-page-head__title">Tin tức công nghệ</h1>
-                    <p className="store-page-head__subtitle">Tổng hợp bài viết mới nhất để chọn sản phẩm và build setup phù hợp.</p>
+                    <p className="store-page-head__eyebrow">Content & guidance</p>
+                    <h1 className="store-page-head__title">Tech news</h1>
+                    <p className="store-page-head__subtitle">A curated feed of the latest posts to help you choose the right products and setup.</p>
                 </div>
                 <div className="store-page-head__summary">
-                    <Tag color="blue">Tổng bài viết: {total}</Tag>
+                    <Tag color="blue">Total posts: {total}</Tag>
                 </div>
             </div>
 
             <div className="product-toolbar">
-                <div className="product-toolbar__summary">Hiển thị {items.length} / {total} bài viết</div>
+                <div className="product-toolbar__summary">Showing {items.length} / {total} posts</div>
                 <Select className="product-toolbar__sort" value={sortValue} options={sortOptions} onChange={setSortValue} />
             </div>
 
@@ -85,7 +85,7 @@ const PostsPage = () => {
                     ))}
                 </div>
             ) : (
-                <Empty description="Chưa có bài viết" />
+                <Empty description="No posts yet" />
             )}
         </div>
     );

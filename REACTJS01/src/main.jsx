@@ -19,8 +19,10 @@ import ForgotPasswordPage from './pages/forgot-password.jsx';
 import ProductsPage from './pages/products.jsx';
 import ProductDetailPage from './pages/product-detail.jsx';
 import CartPage from './pages/cart.jsx';
+import CheckoutPage from './pages/checkout.jsx';
 import PostDetailPage from './pages/post-detail.jsx';
 import PostsPage from './pages/posts.jsx';
+import OrdersPage from './pages/orders.jsx';
 import ProfilePage from './pages/profile.jsx';
 import AdminPage from './pages/admin.jsx';
 
@@ -42,8 +44,24 @@ const router = createBrowserRouter(
                         </ProtectedRoute>
                     )}
                 />
+                <Route
+                    path="checkout"
+                    element={(
+                        <ProtectedRoute>
+                            <CheckoutPage />
+                        </ProtectedRoute>
+                    )}
+                />
                 <Route path="posts" element={<PostsPage />} />
                 <Route path="posts/:slug" element={<PostDetailPage />} />
+                <Route
+                    path="orders"
+                    element={(
+                        <ProtectedRoute>
+                            <OrdersPage />
+                        </ProtectedRoute>
+                    )}
+                />
                 <Route
                     path="user"
                     element={(

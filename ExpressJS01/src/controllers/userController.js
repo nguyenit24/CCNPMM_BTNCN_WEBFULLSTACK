@@ -3,6 +3,10 @@ const {
     loginService,
     getUserService,
     getUserDetailService,
+    getAccountService,
+    addAddressService,
+    updateAddressService,
+    deleteAddressService,
     updateUserService,
     deleteUserService,
 } = require("../services/userService");
@@ -25,7 +29,47 @@ const getUser = async (req, res) => {
 }
 
 const getAccount = async (req, res) => {
-    return res.status(200).json(req.user)
+    try {
+        const data = await getAccountService(req.user.id);
+        return res.status(200).json(data)
+    } catch (error) {
+        console.log(error);
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
+const addAccountAddress = async (req, res) => {
+    try {
+        const data = await addAddressService(req.user.id, req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
+const updateAccountAddress = async (req, res) => {
+    try {
+        const data = await updateAddressService(req.user.id, req.params.addressId, req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
+const deleteAccountAddress = async (req, res) => {
+    try {
+        const data = await deleteAddressService(req.user.id, req.params.addressId);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Đã xảy ra lỗi máy chủ' });
+    }
 }
 
 const getUserDetail = async (req, res) => {
@@ -71,6 +115,9 @@ module.exports = {
     handleLogin,
     getUser,
     getAccount,
+    addAccountAddress,
+    updateAccountAddress,
+    deleteAccountAddress,
     getUserDetail,
     updateUser,
     deleteUser,

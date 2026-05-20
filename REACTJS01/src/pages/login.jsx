@@ -26,10 +26,12 @@ const LoginPage = () => {
             setAuth({
                 isAuthenticated: true,
                 user: {
-                    id: res?.user?.id ?? '',
+                    id: res?.user?.id ?? res?.user?._id ?? '',
                     email: res?.user?.email ?? '',
                     name: res?.user?.name ?? '',
                     role: res?.user?.role ?? 'Member',
+                    addresses: Array.isArray(res?.user?.addresses) ? res.user.addresses : [],
+                    defaultAddress: res?.user?.defaultAddress || null,
                 },
             });
 

@@ -689,6 +689,397 @@
           },
           "response": []
         }
+      ,
+        {
+          "name": "Backend Current Routes",
+          "item": [
+            {
+              "name": "Auth & Debug",
+              "item": [
+                {
+                  "name": "Request Register OTP",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      { "key": "Content-Type", "value": "application/json" }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"demo.user@example.com\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/register/request-otp"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Verify Register OTP",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      { "key": "Content-Type", "value": "application/json" }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"demo.user@example.com\",\n  \"otp\": \"123456\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/register/verify-otp"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Request Forgot Password OTP",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      { "key": "Content-Type", "value": "application/json" }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"demo.user@example.com\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/forgot-password/request-otp"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Reset Password With OTP",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      { "key": "Content-Type", "value": "application/json" }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"demo.user@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"12345678\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/forgot-password/reset-password"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Send Test Email",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      { "key": "Content-Type", "value": "application/json" }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"demo.user@example.com\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/debug/send-test-email"
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Catalog Current Routes",
+              "item": [
+                {
+                  "name": "Home",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/home" },
+                  "response": []
+                },
+                {
+                  "name": "List Categories",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/categories" },
+                  "response": []
+                },
+                {
+                  "name": "Get Category Detail",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/categories/{{categorySlug}}" },
+                  "response": []
+                },
+                {
+                  "name": "List Promotions",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/promotions" },
+                  "response": []
+                },
+                {
+                  "name": "Get Promotion Detail",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/promotions/{{promotionSlug}}" },
+                  "response": []
+                },
+                {
+                  "name": "List Posts",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/posts" },
+                  "response": []
+                },
+                {
+                  "name": "Get Post Detail",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/posts/{{postSlug}}" },
+                  "response": []
+                },
+                {
+                  "name": "List Products",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/products" },
+                  "response": []
+                },
+                {
+                  "name": "Top Products",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/products/top?type=bestSeller&page=1&limit=10" },
+                  "response": []
+                },
+                {
+                  "name": "Get Product Detail",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/products/{{productSlug}}" },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Account, Cart, Orders",
+              "auth": {
+                "type": "bearer",
+                "bearer": [
+                  { "key": "token", "value": "{{accessToken}}", "type": "string" }
+                ]
+              },
+              "item": [
+                {
+                  "name": "Get Account",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/account" },
+                  "response": []
+                },
+                {
+                  "name": "Add Address",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"label\": \"Nhà riêng\",\n  \"recipientName\": \"Demo User\",\n  \"phone\": \"0900000000\",\n  \"line1\": \"194 Đình Phong Phú\",\n  \"ward\": \"Tăng Nhơn Phú B\",\n  \"district\": \"TP Thủ Đức\",\n  \"province\": \"TP Hồ Chí Minh\",\n  \"country\": \"Việt Nam\",\n  \"detail\": \"Cổng trước, giao giờ hành chính\",\n  \"googleMapsLink\": \"https://maps.google.com\",\n  \"isDefault\": true\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/account/addresses"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update Address",
+                  "request": {
+                    "method": "PUT",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"label\": \"Nhà riêng\",\n  \"recipientName\": \"Demo User Updated\",\n  \"phone\": \"0900000000\",\n  \"line1\": \"194 Đình Phong Phú\",\n  \"ward\": \"Tăng Nhơn Phú B\",\n  \"district\": \"TP Thủ Đức\",\n  \"province\": \"TP Hồ Chí Minh\",\n  \"country\": \"Việt Nam\",\n  \"detail\": \"Cổng trước, giao giờ hành chính\",\n  \"googleMapsLink\": \"https://maps.google.com\",\n  \"isDefault\": true\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/account/addresses/{{addressId}}"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Delete Address",
+                  "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/v1/api/account/addresses/{{addressId}}" },
+                  "response": []
+                },
+                {
+                  "name": "Get Cart",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/cart" },
+                  "response": []
+                },
+                {
+                  "name": "Add Cart Item",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"slug\": \"ban-phim-co-custom-keyforge\",\n  \"quantity\": 1\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/cart/items"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update Cart Item",
+                  "request": {
+                    "method": "PUT",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"quantity\": 2\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/cart/items/{{productSlug}}"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Remove Cart Item",
+                  "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/v1/api/cart/items/{{productSlug}}" },
+                  "response": []
+                },
+                {
+                  "name": "Clear Cart",
+                  "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/v1/api/cart" },
+                  "response": []
+                },
+                {
+                  "name": "List Orders",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/orders" },
+                  "response": []
+                },
+                {
+                  "name": "Get Order Detail",
+                  "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/v1/api/orders/{{orderId}}" },
+                  "response": []
+                },
+                {
+                  "name": "Checkout COD",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"paymentMethod\": \"COD\",\n  \"addressId\": \"{{addressId}}\",\n  \"notes\": \"Gọi trước khi giao\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/orders/checkout"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Cancel Order",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"reason\": \"Đổi ý\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/orders/{{orderId}}/cancel"
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "Admin Current CRUD",
+              "auth": {
+                "type": "bearer",
+                "bearer": [
+                  { "key": "token", "value": "{{accessToken}}", "type": "string" }
+                ]
+              },
+              "item": [
+                {
+                  "name": "Create Category",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Audio\",\n  \"slug\": \"audio\",\n  \"description\": \"Premium audio gear\",\n  \"image\": \"https://picsum.photos/seed/audio/600/400\",\n  \"order\": 1\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/categories"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update Category",
+                  "request": {
+                    "method": "PUT",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Audio Updated\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/categories/{{categorySlug}}"
+                  },
+                  "response": []
+                },
+                { "name": "Delete Category", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/v1/api/categories/{{categorySlug}}" }, "response": [] },
+                {
+                  "name": "Create Promotion",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Sale Banner\",\n  \"slug\": \"sale-banner\",\n  \"description\": \"Flash sale banner\",\n  \"image\": \"https://picsum.photos/seed/promo/1200/600\",\n  \"order\": 1,\n  \"active\": true\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/promotions"
+                  },
+                  "response": []
+                },
+                {
+                  "name": "Update Promotion",
+                  "request": {
+                    "method": "PUT",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Sale Banner Updated\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/promotions/{{promotionSlug}}"
+                  },
+                  "response": []
+                },
+                { "name": "Delete Promotion", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/v1/api/promotions/{{promotionSlug}}" }, "response": [] },
+                {
+                  "name": "Create Post",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"title\": \"New Post\",\n  \"slug\": \"new-post\",\n  \"content\": \"Content...\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/posts"
+                  },
+                  "response": []
+                },
+                { "name": "Update Post", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"title\": \"New Post Updated\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/v1/api/posts/{{postSlug}}" }, "response": [] },
+                { "name": "Delete Post", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/v1/api/posts/{{postSlug}}" }, "response": [] },
+                {
+                  "name": "Create Product",
+                  "request": {
+                    "method": "POST",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Sample Product\",\n  \"slug\": \"sample-product\",\n  \"categorySlug\": \"audio\",\n  \"categoryName\": \"Audio\",\n  \"price\": 99,\n  \"stock\": 20\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/products"
+                  },
+                  "response": []
+                },
+                { "name": "Update Product", "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Sample Product Updated\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/v1/api/products/{{productSlug}}" }, "response": [] },
+                { "name": "Delete Product", "request": { "method": "DELETE", "header": [], "url": "{{baseUrl}}/v1/api/products/{{productSlug}}" }, "response": [] },
+                {
+                  "name": "Update Order Status",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"status\": \"confirmed\",\n  \"note\": \"Xác nhận thủ công\"\n}",
+                      "options": { "raw": { "language": "json" } }
+                    },
+                    "url": "{{baseUrl}}/v1/api/orders/{{orderId}}/status"
+                  },
+                  "response": []
+                }
+              ]
+            }
+          ]
+        }
       ]
     }
   ],

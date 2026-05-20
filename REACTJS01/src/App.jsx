@@ -26,10 +26,12 @@ function App() {
                 setAuth({
                     isAuthenticated: true,
                     user: {
-                        id: res.id ?? "",
+                        id: res.id ?? res._id ?? "",
                         email: res.email,
                         name: res.name,
-                        role: res.role || "Member"
+                        role: res.role || "Member",
+                        addresses: Array.isArray(res.addresses) ? res.addresses : [],
+                        defaultAddress: res.defaultAddress || null,
                     }
                 })
             } else {
@@ -39,7 +41,9 @@ function App() {
                         id: "",
                         email: "",
                         name: "",
-                        role: "Member"
+                        role: "Member",
+                        addresses: [],
+                        defaultAddress: null,
                     }
                 })
             }

@@ -4,6 +4,9 @@ const {
     handleLogin,
     getUser,
     getAccount,
+    addAccountAddress,
+    updateAccountAddress,
+    deleteAccountAddress,
     getUserDetail,
     updateUser,
     deleteUser,
@@ -52,6 +55,13 @@ const {
     removeCartItem,
     clearCart,
 } = require('../controllers/cartController');
+const {
+    getOrders,
+    getOrderDetail,
+    checkoutOrder,
+    cancelOrder,
+    updateOrderStatus,
+} = require('../controllers/orderController');
 const { authenticate, authorizeRoles } = require('../middleware/auth');
 const delay = require('../middleware/delay');
 
@@ -87,11 +97,20 @@ routerAPI.get("/products/:slug", getProductDetail);
 routerAPI.use(authenticate);
 
 routerAPI.get("/account", delay, getAccount);
+routerAPI.post("/account/addresses", addAccountAddress);
+routerAPI.put("/account/addresses/:addressId", updateAccountAddress);
+routerAPI.delete("/account/addresses/:addressId", deleteAccountAddress);
 routerAPI.get("/cart", getCart);
 routerAPI.post("/cart/items", addCartItem);
 routerAPI.put("/cart/items/:slug", updateCartItem);
 routerAPI.delete("/cart/items/:slug", removeCartItem);
 routerAPI.delete("/cart", clearCart);
+
+routerAPI.get("/orders", getOrders);
+routerAPI.get("/orders/:id", getOrderDetail);
+routerAPI.post("/orders/checkout", checkoutOrder);
+routerAPI.post("/orders/:id/cancel", cancelOrder);
+routerAPI.patch("/orders/:id/status", authorizeRoles('Admin'), updateOrderStatus);
 
 routerAPI.get("/user", authorizeRoles('Admin'), getUser);
 routerAPI.get("/user/:id", authorizeRoles('Admin'), getUserDetail);

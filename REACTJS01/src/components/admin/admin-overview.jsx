@@ -2,6 +2,7 @@ import { Card, Statistic, Button, Space } from 'antd';
 import {
     AppstoreOutlined,
     BarChartOutlined,
+    CarryOutOutlined,
     FileTextOutlined,
     ShoppingOutlined,
     TeamOutlined,
@@ -53,6 +54,14 @@ const AdminOverview = ({ stats, loading, onOpenSection }) => (
                 loading={loading}
             />
             <AdminMetricCard
+                label="Orders"
+                value={stats.orders}
+                helper="COD orders waiting for processing"
+                icon={<CarryOutOutlined />}
+                color="linear-gradient(135deg, #0f766e, #14b8a6)"
+                loading={loading}
+            />
+            <AdminMetricCard
                 label="Posts"
                 value={stats.posts}
                 helper="News and advice articles"
@@ -69,6 +78,7 @@ const AdminOverview = ({ stats, loading, onOpenSection }) => (
                     <Button onClick={() => onOpenSection('categories')}>Categories</Button>
                     <Button onClick={() => onOpenSection('promotions')}>Promotions</Button>
                     <Button onClick={() => onOpenSection('products')}>Products</Button>
+                    <Button onClick={() => onOpenSection('orders')}>Orders</Button>
                     <Button onClick={() => onOpenSection('posts')}>Posts</Button>
                 </div>
             </Card>

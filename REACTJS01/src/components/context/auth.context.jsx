@@ -6,7 +6,9 @@ export const AuthContext = createContext({
         id: "",
         email: "",
         name: "",
-        role: "Member"
+        role: "Member",
+        addresses: [],
+        defaultAddress: null,
     },
     appLoading: true,
 });
@@ -19,7 +21,9 @@ export const AuthWrapper = (props) => {
             id: "",
             email: "",
             name: "",
-            role: "Member"
+            role: "Member",
+            addresses: [],
+            defaultAddress: null,
         }
     });
 

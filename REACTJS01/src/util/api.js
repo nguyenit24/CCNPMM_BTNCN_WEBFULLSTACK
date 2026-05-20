@@ -239,6 +239,62 @@ const clearCartApi = () => {
     return axios.delete(URL_API)
 }
 
+const addAccountAddressApi = (data = {}) => {
+
+    const URL_API = "/v1/api/account/addresses";
+
+    return axios.post(URL_API, data)
+}
+
+const updateAccountAddressApi = (addressId, data = {}) => {
+
+    const URL_API = `/v1/api/account/addresses/${addressId}`;
+
+    return axios.put(URL_API, data)
+}
+
+const deleteAccountAddressApi = (addressId) => {
+
+    const URL_API = `/v1/api/account/addresses/${addressId}`;
+
+    return axios.delete(URL_API)
+}
+
+const getOrdersApi = () => {
+
+    const URL_API = "/v1/api/orders";
+
+    return axios.get(URL_API)
+}
+
+const getOrderDetailApi = (id) => {
+
+    const URL_API = `/v1/api/orders/${id}`;
+
+    return axios.get(URL_API)
+}
+
+const checkoutOrderApi = (data = {}) => {
+
+    const URL_API = "/v1/api/orders/checkout";
+
+    return axios.post(URL_API, data)
+}
+
+const cancelOrderApi = (id, data = {}) => {
+
+    const URL_API = `/v1/api/orders/${id}/cancel`;
+
+    return axios.post(URL_API, data)
+}
+
+const updateOrderStatusApi = (id, data = {}) => {
+
+    const URL_API = `/v1/api/orders/${id}/status`;
+
+    return axios.patch(URL_API, data)
+}
+
 const getPostDetailApi = (slug) => {
 
     const URL_API = `/v1/api/posts/${slug}`;
@@ -308,6 +364,14 @@ export {
     updateCartItemApi,
     removeCartItemApi,
     clearCartApi,
+    addAccountAddressApi,
+    updateAccountAddressApi,
+    deleteAccountAddressApi,
+    getOrdersApi,
+    getOrderDetailApi,
+    checkoutOrderApi,
+    cancelOrderApi,
+    updateOrderStatusApi,
     getPostsApi,
     getPostDetailApi,
     createPostApi,

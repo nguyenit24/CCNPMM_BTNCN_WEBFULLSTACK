@@ -3,6 +3,7 @@ import { Avatar, Button, Card, Layout, Menu, Space, Tag } from 'antd';
 import {
     AppstoreOutlined,
     BarChartOutlined,
+    CarryOutOutlined,
     DashboardOutlined,
     FileTextOutlined,
     ReloadOutlined,
@@ -16,6 +17,7 @@ const adminMenuItems = [
     { key: 'categories', icon: <AppstoreOutlined />, label: 'Categories' },
     { key: 'promotions', icon: <BarChartOutlined />, label: 'Promotions' },
     { key: 'products', icon: <ShoppingOutlined />, label: 'Products' },
+    { key: 'orders', icon: <CarryOutOutlined />, label: 'Orders' },
     { key: 'posts', icon: <FileTextOutlined />, label: 'Posts' },
 ];
 

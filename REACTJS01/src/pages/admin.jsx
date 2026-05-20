@@ -7,8 +7,9 @@ import UsersAdmin from '../components/admin/users-admin';
 import CategoriesAdmin from '../components/admin/categories-admin';
 import PromotionsAdmin from '../components/admin/promotions-admin';
 import ProductsAdmin from '../components/admin/products-admin';
+import OrdersAdmin from '../components/admin/orders-admin';
 import PostsAdmin from '../components/admin/posts-admin';
-import { getCategoriesApi, getPostsApi, getProductsApi, getPromotionsApi, getUserApi } from '../util/api';
+import { getCategoriesApi, getOrdersApi, getPostsApi, getProductsApi, getPromotionsApi, getUserApi } from '../util/api';
 import { normalizeCollection } from '../components/admin/admin-utils';
 
 const sectionMeta = {
@@ -32,6 +33,10 @@ const sectionMeta = {
         label: 'Products',
         description: 'CRUD the full product catalog with the existing API.',
     },
+    orders: {
+        label: 'Orders',
+        description: 'Track COD orders and update delivery status through the admin panel.',
+    },
     posts: {
         label: 'Posts',
         description: 'CRUD blog and news content for the storefront.',
@@ -43,6 +48,7 @@ const sectionComponents = {
     categories: <CategoriesAdmin />,
     promotions: <PromotionsAdmin />,
     products: <ProductsAdmin />,
+    orders: <OrdersAdmin />,
     posts: <PostsAdmin />,
 };
 
@@ -56,17 +62,19 @@ const AdminPage = () => {
         categories: 0,
         promotions: 0,
         products: 0,
+        orders: 0,
         posts: 0,
     });
 
     const loadOverview = async () => {
         setOverviewLoading(true);
 
-        const [usersRes, categoriesRes, promotionsRes, productsRes, postsRes] = await Promise.all([
+        const [usersRes, categoriesRes, promotionsRes, productsRes, ordersRes, postsRes] = await Promise.all([
             getUserApi().catch(() => []),
             getCategoriesApi().catch(() => []),
             getPromotionsApi().catch(() => []),
             getProductsApi({ page: 1, limit: 1 }).catch(() => ({ total: 0, items: [] })),
+            getOrdersApi().catch(() => []),
             getPostsApi({ page: 1, limit: 1 }).catch(() => ({ total: 0, items: [] })),
         ]);
 
@@ -75,6 +83,7 @@ const AdminPage = () => {
             categories: normalizeCollection(categoriesRes).length,
             promotions: normalizeCollection(promotionsRes).length,
             products: Number(productsRes?.total ?? normalizeCollection(productsRes).length ?? 0),
+            orders: normalizeCollection(ordersRes).length,
             posts: Number(postsRes?.total ?? normalizeCollection(postsRes).length ?? 0),
         });
         setOverviewLoading(false);

@@ -205,6 +205,9 @@ const CartPage = () => {
                         <strong>{moneyFormatter.format(subtotal)}</strong>
                     </div>
                     <div className="cart-page__actions">
+                        <Button type="primary" onClick={() => navigate('/checkout')}>
+                            Thanh toán COD
+                        </Button>
                         <Button type="primary" onClick={() => navigate('/products')}>
                             Tiếp tục mua sắm
                         </Button>

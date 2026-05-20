@@ -68,6 +68,11 @@ const Header = () => {
                 ),
             },
             { type: 'divider' },
+              {
+                key: 'orders',
+                label: <Link to="/orders">Đơn hàng của tôi</Link>,
+            },
+            { type: 'divider' },
             {
                 key: 'logout',
                 label: (
@@ -102,6 +107,11 @@ const Header = () => {
                 <NavLink to="/posts" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                     Posts
                 </NavLink>
+                {auth.isAuthenticated ? (
+                    <NavLink to="/orders" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
+                        Đơn hàng
+                    </NavLink>
+                ) : null}
                 {showAdminLink ? (
                     <NavLink to="/admin" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                         Admin

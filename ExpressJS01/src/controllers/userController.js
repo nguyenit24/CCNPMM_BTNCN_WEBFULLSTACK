@@ -9,6 +9,8 @@ const {
     deleteAddressService,
     updateUserService,
     deleteUserService,
+    handleRefreshTokenService,
+    logoutService,
 } = require("../services/userService");
 
 const createUser = async (req, res) => {
@@ -110,6 +112,37 @@ const deleteUser = async (req, res) => {
     }
 }
 
+const handleRefreshToken = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp Refresh Token' });
+        }
+
+        const data = await handleRefreshTokenService(refreshToken);
+        if (!data) {
+            return res.status(401).json({ message: 'Refresh Token không hợp lệ hoặc đã hết hạn' });
+        }
+
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
+const handleLogout = async (req, res) => {
+    try {
+        if (req.user?.id) {
+            await logoutService(req.user.id);
+        }
+        return res.status(200).json({ message: 'Đăng xuất thành công' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
 module.exports = {
     createUser,
     handleLogin,
@@ -121,4 +154,6 @@ module.exports = {
     getUserDetail,
     updateUser,
     deleteUser,
+    handleRefreshToken,
+    handleLogout,
 }

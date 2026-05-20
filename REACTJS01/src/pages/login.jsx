@@ -17,10 +17,13 @@ const LoginPage = () => {
 
         if (res && res.EC === 0) {
             localStorage.setItem('access_token', res.access_token);
+            if (res.refresh_token) {
+                localStorage.setItem('refresh_token', res.refresh_token);
+            }
 
             notification.success({
-                message: 'Login successful',
-                description: 'Welcome back to TechStudio',
+                message: 'Đăng nhập thành công',
+                description: 'Chào mừng bạn quay trở lại với TechStudio',
             });
 
             setAuth({
@@ -38,26 +41,26 @@ const LoginPage = () => {
             navigate('/');
         } else {
             notification.error({
-                message: 'Login failed',
-                description: res?.EM ?? 'error',
+                message: 'Đăng nhập thất bại',
+                description: res?.EM ?? 'Email hoặc mật khẩu không chính xác!',
             });
         }
     };
 
     return (
         <AuthLayout
-            title="Login"
-            description="Sign in to your account"
+            title="Đăng nhập"
+            description="Đăng nhập tài khoản để mua sắm công nghệ đỉnh cao"
             footer={(
                 <Space direction="vertical" size={10} className="auth-card__footer-block">
                     <div className="auth-card__links auth-card__links--single">
                         <Link to="/">
-                            <ArrowLeftOutlined /> Back to home
+                            <ArrowLeftOutlined /> Quay lại trang chủ
                         </Link>
-                        <Link to="/forgot-password">Forgot password?</Link>
+                        <Link to="/forgot-password">Quên mật khẩu?</Link>
                     </div>
                     <div className="auth-card__footer" style={{ textAlign: 'center' }}>
-                        No account yet? <Link to="/register">Register now</Link>
+                        Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
                     </div>
                 </Space>
             )}
@@ -66,22 +69,22 @@ const LoginPage = () => {
                 <Form.Item
                     label="Email"
                     name="email"
-                    rules={[{ required: true, message: 'Please enter your email' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập email của bạn!' }]}
                 >
                     <Input prefix={<MailOutlined />} placeholder="your@email.com" />
                 </Form.Item>
 
                 <Form.Item
-                    label="Password"
+                    label="Mật khẩu"
                     name="password"
-                    rules={[{ required: true, message: 'Please enter your password' }]}
+                    rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
                 >
-                    <Input.Password prefix={<LockOutlined />} placeholder="Enter your password" />
+                    <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
                 </Form.Item>
 
                 <Form.Item className="auth-form__submit">
                     <Button type="primary" htmlType="submit" block className="auth-gradient-btn">
-                        Sign in
+                        Đăng nhập
                     </Button>
                 </Form.Item>
             </Form>

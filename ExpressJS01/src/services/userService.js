@@ -193,9 +193,20 @@ const loginService = async (email, password) => {
                         expiresIn: process.env.JWT_EXPIRE
                     }
                 )
+                const refresh_token = jwt.sign(
+                    { id: user._id.toString() },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: '30d'
+                    }
+                )
+                user.refreshToken = refresh_token;
+                await user.save();
+
                 return {
                     EC: 0,
                     access_token,
+                    refresh_token,
                     user: serializeUser(user)
                 };
             }
@@ -377,6 +388,63 @@ const deleteUserService = async (id) => {
     return user;
 };
 
+const handleRefreshTokenService = async (refreshToken) => {
+    try {
+        if (!refreshToken) return null;
+        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id);
+        if (!user || user.refreshToken !== refreshToken) {
+            return null;
+        }
+
+        const payload = {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
+            role: user.role || "Member"
+        };
+
+        const access_token = jwt.sign(
+            payload,
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRE || '1h' }
+        );
+
+        const new_refresh_token = jwt.sign(
+            { id: user._id.toString() },
+            process.env.JWT_SECRET,
+            { expiresIn: '30d' }
+        );
+
+        user.refreshToken = new_refresh_token;
+        await user.save();
+
+        return {
+            access_token,
+            refresh_token: new_refresh_token,
+            user: serializeUser(user)
+        };
+    } catch (error) {
+        console.log("Error in handleRefreshTokenService:", error);
+        return null;
+    }
+};
+
+const logoutService = async (userId) => {
+    try {
+        const user = await User.findById(userId);
+        if (user) {
+            user.refreshToken = '';
+            await user.save();
+            return true;
+        }
+        return false;
+    } catch (error) {
+        console.log("Error in logoutService:", error);
+        return false;
+    }
+};
+
 module.exports = {
     createUserService,
     loginService,
@@ -388,4 +456,6 @@ module.exports = {
     deleteAddressService,
     updateUserService,
     deleteUserService,
+    handleRefreshTokenService,
+    logoutService,
 }

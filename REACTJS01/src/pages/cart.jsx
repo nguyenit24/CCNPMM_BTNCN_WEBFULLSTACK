@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Popconfirm, Result, Spin, Tag, notification } from 'antd';
-import { DeleteOutlined, MinusOutlined, PlusOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, DeleteOutlined, MinusOutlined, PlusOutlined, ShoppingCartOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { clearCartApi, getCartApi, removeCartItemApi, updateCartItemApi } from '../util/api';
 
-const moneyFormatter = new Intl.NumberFormat('en-US', {
+const moneyFormatter = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'VND',
+    maximumFractionDigits: 0,
 });
 
 const CartPage = () => {
@@ -18,21 +19,14 @@ const CartPage = () => {
     const loadCart = async () => {
         setLoading(true);
         const res = await getCartApi();
-
         if (res?.message) {
-            notification.error({
-                message: 'Tải giỏ hàng',
-                description: res.message,
-            });
+            notification.error({ message: 'Tải giỏ hàng', description: res.message });
         }
-
         setCart(res?.cart || { items: [], subtotal: 0, totalQuantity: 0, itemCount: 0 });
         setLoading(false);
     };
 
-    useEffect(() => {
-        loadCart();
-    }, []);
+    useEffect(() => { loadCart(); }, []);
 
     const items = useMemo(() => Array.isArray(cart?.items) ? cart.items : [], [cart]);
     const subtotal = Number(cart?.subtotal || 0);
@@ -46,31 +40,22 @@ const CartPage = () => {
             });
             return;
         }
-
         setMutating(true);
         const res = await updateCartItemApi(item.slug, { quantity: item.quantity + 1 });
-        if (res?.message) {
-            notification.error({ message: 'Cập nhật giỏ hàng', description: res.message });
-        }
+        if (res?.message) notification.error({ message: 'Cập nhật giỏ hàng', description: res.message });
         await loadCart();
         setMutating(false);
     };
 
     const handleDecrement = async (item) => {
         setMutating(true);
-
         if (item.quantity <= 1) {
             const res = await removeCartItemApi(item.slug);
-            if (res?.message) {
-                notification.error({ message: 'Xóa sản phẩm', description: res.message });
-            }
+            if (res?.message) notification.error({ message: 'Xóa sản phẩm', description: res.message });
         } else {
             const res = await updateCartItemApi(item.slug, { quantity: item.quantity - 1 });
-            if (res?.message) {
-                notification.error({ message: 'Cập nhật giỏ hàng', description: res.message });
-            }
+            if (res?.message) notification.error({ message: 'Cập nhật giỏ hàng', description: res.message });
         }
-
         await loadCart();
         setMutating(false);
     };
@@ -78,9 +63,7 @@ const CartPage = () => {
     const handleRemove = async (item) => {
         setMutating(true);
         const res = await removeCartItemApi(item.slug);
-        if (res?.message) {
-            notification.error({ message: 'Xóa sản phẩm', description: res.message });
-        }
+        if (res?.message) notification.error({ message: 'Xóa sản phẩm', description: res.message });
         await loadCart();
         setMutating(false);
     };
@@ -88,9 +71,7 @@ const CartPage = () => {
     const handleClearCart = async () => {
         setMutating(true);
         const res = await clearCartApi();
-        if (res?.message) {
-            notification.error({ message: 'Xóa giỏ hàng', description: res.message });
-        }
+        if (res?.message) notification.error({ message: 'Xóa giỏ hàng', description: res.message });
         await loadCart();
         setMutating(false);
     };
@@ -107,13 +88,13 @@ const CartPage = () => {
         return (
             <div className="store-layout cart-empty">
                 <Result
-                    icon={<ShoppingOutlined />}
-                    status="info"
+                    icon={<ShoppingOutlined style={{ color: 'var(--store-primary)' }} />}
                     title="Giỏ hàng của bạn đang trống"
                     subTitle="Hãy chọn sản phẩm từ danh mục để thêm vào giỏ hàng."
                     extra={(
-                        <Button type="primary" onClick={() => navigate('/products')}>
-                            Xem sản phẩm
+                        <Button type="primary" size="large" onClick={() => navigate('/products')}
+                            style={{ borderRadius: 999, fontWeight: 700 }}>
+                            <ShoppingCartOutlined /> Xem sản phẩm
                         </Button>
                     )}
                 />
@@ -123,10 +104,13 @@ const CartPage = () => {
 
     return (
         <div className="store-layout cart-page">
+            {/* Header */}
             <div className="cart-page__header">
                 <div>
-                    <div className="store-page-head__eyebrow">Giỏ hàng</div>
-                    <h1 className="store-page-head__title">Sản phẩm bạn đã chọn</h1>
+                    <div className="store-page-head__eyebrow">
+                        <ShoppingCartOutlined /> Giỏ hàng
+                    </div>
+                    <h1 className="store-page-head__title">Sản phẩm đã chọn</h1>
                 </div>
                 <div className="store-page-head__summary">
                     <Tag color="blue">{items.length} sản phẩm</Tag>
@@ -135,6 +119,7 @@ const CartPage = () => {
             </div>
 
             <div className="cart-page__grid">
+                {/* Cart Items */}
                 <section className="cart-list">
                     {items.map((item) => (
                         <article key={item.productId} className="cart-item">
@@ -151,7 +136,7 @@ const CartPage = () => {
                                         <div className="cart-item__meta">
                                             <span>{item.categoryName}</span>
                                             <span>•</span>
-                                            <span>Tồn kho: {item.stock}</span>
+                                            <span>Còn {item.stock} sp</span>
                                         </div>
                                     </div>
                                     <div className="cart-item__prices">
@@ -164,9 +149,9 @@ const CartPage = () => {
 
                                 <div className="cart-item__actions">
                                     <div className="quantity-stepper">
-                                        <Button icon={<MinusOutlined />} onClick={() => handleDecrement(item)} disabled={mutating} />
+                                        <Button icon={<MinusOutlined />} onClick={() => handleDecrement(item)} disabled={mutating} size="small" />
                                         <span className="quantity-stepper__value">{item.quantity}</span>
-                                        <Button icon={<PlusOutlined />} onClick={() => handleIncrement(item)} disabled={mutating || item.quantity >= item.stock} />
+                                        <Button icon={<PlusOutlined />} onClick={() => handleIncrement(item)} disabled={mutating || item.quantity >= item.stock} size="small" />
                                     </div>
                                     <Popconfirm
                                         title="Xóa sản phẩm khỏi giỏ?"
@@ -175,7 +160,7 @@ const CartPage = () => {
                                         cancelText="Hủy"
                                         onConfirm={() => handleRemove(item)}
                                     >
-                                        <Button danger icon={<DeleteOutlined />} disabled={mutating}>
+                                        <Button danger icon={<DeleteOutlined />} disabled={mutating} size="small">
                                             Xóa
                                         </Button>
                                     </Popconfirm>
@@ -190,25 +175,40 @@ const CartPage = () => {
                     ))}
                 </section>
 
+                {/* Order Summary */}
                 <aside className="content-card cart-summary">
-                    <h2 className="content-card__title">Tổng đơn</h2>
-                    <div className="cart-summary__row">
-                        <span>Tạm tính</span>
-                        <strong>{moneyFormatter.format(subtotal)}</strong>
+                    <h2 className="content-card__title" style={{ marginBottom: 20 }}>Tóm tắt đơn hàng</h2>
+
+                    <div className="cart-summary__row" style={{ marginBottom: 10 }}>
+                        <span style={{ color: 'var(--store-muted)' }}>Tạm tính</span>
+                        <span>{moneyFormatter.format(subtotal)}</span>
                     </div>
-                    <div className="cart-summary__row">
-                        <span>Số lượng</span>
-                        <strong>{totalQuantity}</strong>
+                    <div className="cart-summary__row" style={{ marginBottom: 10 }}>
+                        <span style={{ color: 'var(--store-muted)' }}>Số lượng SP</span>
+                        <span>{totalQuantity}</span>
                     </div>
-                    <div className="cart-summary__row cart-summary__total">
+                    <div className="cart-summary__row" style={{ marginBottom: 10 }}>
+                        <span style={{ color: 'var(--store-muted)' }}>Phí vận chuyển</span>
+                        <Tag color="green" style={{ margin: 0 }}>Miễn phí</Tag>
+                    </div>
+
+                    <div className="cart-summary__row cart-summary__total" style={{ marginTop: 8 }}>
                         <span>Tổng cộng</span>
-                        <strong>{moneyFormatter.format(subtotal)}</strong>
+                        <strong style={{ fontSize: '1.2rem', color: 'var(--store-primary)' }}>{moneyFormatter.format(subtotal)}</strong>
                     </div>
-                    <div className="cart-page__actions">
-                        <Button type="primary" onClick={() => navigate('/checkout')}>
-                            Thanh toán COD
+
+                    <div className="cart-page__actions" style={{ flexDirection: 'column' }}>
+                        <Button
+                            type="primary"
+                            block
+                            size="large"
+                            onClick={() => navigate('/checkout')}
+                            icon={<ArrowRightOutlined />}
+                            style={{ borderRadius: 999, fontWeight: 700, background: 'linear-gradient(135deg, var(--store-primary), #7c3aed)', border: 0 }}
+                        >
+                            Thanh toán ngay
                         </Button>
-                        <Button type="primary" onClick={() => navigate('/products')}>
+                        <Button block onClick={() => navigate('/products')} style={{ borderRadius: 999, fontWeight: 600 }}>
                             Tiếp tục mua sắm
                         </Button>
                         <Popconfirm
@@ -218,7 +218,7 @@ const CartPage = () => {
                             cancelText="Hủy"
                             onConfirm={handleClearCart}
                         >
-                            <Button danger disabled={mutating}>
+                            <Button danger block disabled={mutating} style={{ borderRadius: 999 }}>
                                 Xóa giỏ hàng
                             </Button>
                         </Popconfirm>

@@ -17,20 +17,16 @@ const ProfilePage = () => {
     const [form] = Form.useForm();
 
     const addresses = useMemo(() => Array.isArray(account?.addresses) ? account.addresses : [], [account]);
-    const defaultAddress = useMemo(() => account?.defaultAddress || addresses.find((item) => item.isDefault) || addresses[0] || null, [account, addresses]);
+    const defaultAddress = useMemo(
+        () => account?.defaultAddress || addresses.find((a) => a.isDefault) || addresses[0] || null,
+        [account, addresses]
+    );
     const initials = (account?.name || 'M').trim().charAt(0).toUpperCase();
-    const mapQuery = useMemo(() => {
-        const parts = [
-            addressDraft.line1,
-            addressDraft.detail,
-            addressDraft.ward,
-            addressDraft.district,
-            addressDraft.province,
-            addressDraft.country,
-        ]
-            .map((item) => String(item || '').trim())
-            .filter(Boolean);
 
+    const mapQuery = useMemo(() => {
+        const parts = [addressDraft.line1, addressDraft.detail, addressDraft.ward, addressDraft.district, addressDraft.province, addressDraft.country]
+            .map((v) => String(v || '').trim())
+            .filter(Boolean);
         return parts.join(', ');
     }, [addressDraft]);
 
@@ -41,48 +37,34 @@ const ProfilePage = () => {
         setAuth((current) => ({
             ...current,
             isAuthenticated: true,
-            user: {
-                ...(current?.user || {}),
-                ...nextAccount,
-            },
+            user: { ...(current?.user || {}), ...nextAccount },
         }));
     };
 
     const loadAccount = async () => {
         setLoading(true);
         const res = await getAccountApi();
-
         if (res?.message) {
-            notification.error({
-                message: 'Tải hồ sơ',
-                description: res.message,
-            });
+            notification.error({ message: 'Tải hồ sơ', description: res.message });
         } else {
             syncAccount(res);
         }
-
         setLoading(false);
     };
 
-    useEffect(() => {
-        loadAccount();
-    }, []);
+    useEffect(() => { loadAccount(); }, []);
 
     const openCreateAddress = () => {
         setEditingAddress(null);
         form.resetFields();
-        form.setFieldsValue({
-            country: 'Việt Nam',
-            label: 'Địa chỉ nhà',
-            isDefault: addresses.length === 0,
-        });
+        form.setFieldsValue({ country: 'Việt Nam', label: 'Địa chỉ nhà', isDefault: addresses.length === 0 });
         setAddressDraft({ country: 'Việt Nam', label: 'Địa chỉ nhà', isDefault: addresses.length === 0 });
         setAddressModalOpen(true);
     };
 
     const openEditAddress = (address) => {
         setEditingAddress(address);
-        form.setFieldsValue({
+        const vals = {
             label: address.label,
             recipientName: address.recipientName,
             phone: address.phone,
@@ -94,64 +76,38 @@ const ProfilePage = () => {
             detail: address.detail,
             googleMapsLink: address.googleMapsLink,
             isDefault: address.isDefault,
-        });
-        setAddressDraft({
-            label: address.label,
-            recipientName: address.recipientName,
-            phone: address.phone,
-            line1: address.line1,
-            ward: address.ward,
-            district: address.district,
-            province: address.province,
-            country: address.country || 'Việt Nam',
-            detail: address.detail,
-            googleMapsLink: address.googleMapsLink,
-            isDefault: address.isDefault,
-        });
+        };
+        form.setFieldsValue(vals);
+        setAddressDraft(vals);
         setAddressModalOpen(true);
     };
 
     const handleSubmitAddress = async (values) => {
         setSaving(true);
-
-        const payload = {
-            ...values,
-            country: values.country || 'Việt Nam',
-        };
-
+        const payload = { ...values, country: values.country || 'Việt Nam' };
         const res = editingAddress
             ? await updateAccountAddressApi(editingAddress.id || editingAddress._id, payload)
             : await addAccountAddressApi(payload);
-
         if (res?.message) {
-            notification.error({
-                message: editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ',
-                description: res.message,
-            });
+            notification.error({ message: editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ', description: res.message });
         } else {
-            notification.success({
-                message: editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ',
-                description: 'Địa chỉ đã được lưu vào hồ sơ của bạn.',
-            });
+            notification.success({ message: editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ', description: 'Địa chỉ đã được lưu.' });
             setAddressModalOpen(false);
             setEditingAddress(null);
             form.resetFields();
             await loadAccount();
         }
-
         setSaving(false);
     };
 
     const handleDeleteAddress = async (address) => {
         const res = await deleteAccountAddressApi(address.id || address._id);
-
         if (res?.message) {
             notification.error({ message: 'Xóa địa chỉ', description: res.message });
-            return;
+        } else {
+            notification.success({ message: 'Xóa địa chỉ', description: 'Địa chỉ đã được xóa.' });
+            await loadAccount();
         }
-
-        notification.success({ message: 'Xóa địa chỉ', description: 'Địa chỉ đã được xóa.' });
-        await loadAccount();
     };
 
     const handleSetDefault = async (address) => {
@@ -168,84 +124,104 @@ const ProfilePage = () => {
             googleMapsLink: address.googleMapsLink,
             isDefault: true,
         });
-
         if (res?.message) {
             notification.error({ message: 'Đặt mặc định', description: res.message });
-            return;
+        } else {
+            notification.success({ message: 'Đặt mặc định', description: 'Địa chỉ mặc định đã được cập nhật.' });
+            await loadAccount();
         }
-
-        notification.success({ message: 'Đặt mặc định', description: 'Địa chỉ mặc định đã được cập nhật.' });
-        await loadAccount();
     };
 
     return (
         <div className="store-layout">
+            {/* Page Header */}
             <div className="store-page-head">
                 <div>
-              
-                    <h1 className="store-page-head__title">Thông tin tài khoản</h1>
-                
+                    <div className="store-page-head__eyebrow">
+                        <UserOutlined /> Tài khoản của tôi
+                    </div>
+                    <h1 className="store-page-head__title">Thông tin cá nhân</h1>
                 </div>
                 <div className="store-page-head__summary">
                     <Tag color="blue">{addresses.length} địa chỉ</Tag>
-                    <Tag color="green">{defaultAddress ? 'Đã có địa chỉ mặc định' : 'Chưa có địa chỉ mặc định'}</Tag>
+                    <Tag color={defaultAddress ? 'green' : 'orange'}>
+                        {defaultAddress ? 'Đã có địa chỉ mặc định' : 'Chưa có địa chỉ mặc định'}
+                    </Tag>
                 </div>
             </div>
 
             <Row gutter={[20, 20]}>
+                {/* Account Info Card */}
                 <Col xs={24} lg={8}>
                     <Card className="content-card" bordered={false} loading={loading}>
-                        <div style={{ display: 'grid', justifyItems: 'center', gap: 16, textAlign: 'center' }}>
-                            <div style={{ width: 76, height: 76, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #2563eb, #0f766e)', color: '#fff', fontSize: 28, fontWeight: 800 }}>
+                        {/* Avatar */}
+                        <div style={{ display: 'grid', justifyItems: 'center', gap: 16, textAlign: 'center', marginBottom: 24 }}>
+                            <div className="profile-avatar">
                                 {initials}
                             </div>
                             <div>
-                                <h2 className="content-card__title" style={{ marginBottom: 8 }}>Tài khoản của bạn</h2>
-                                <p className="content-card__text" style={{ marginBottom: 0 }}>{account?.email || '---'}</p>
+                                <h2 style={{ margin: '0 0 4px', fontSize: '1.2rem' }}>{account?.name || '---'}</h2>
+                                <p style={{ margin: 0, color: 'var(--store-muted)', fontSize: '0.9rem' }}>{account?.email || '---'}</p>
                             </div>
                         </div>
 
-                        <Divider />
+                        <Divider style={{ margin: '0 0 20px' }} />
 
-                        <div style={{ display: 'grid', gap: 12 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                                <span><UserOutlined /> Họ tên</span>
+                        {/* Account Details */}
+                        <div style={{ display: 'grid', gap: 14 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+                                <span style={{ color: 'var(--store-muted)', fontSize: '0.9rem' }}>
+                                    <UserOutlined /> Họ và tên
+                                </span>
                                 <strong>{account?.name || '---'}</strong>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                                <span>Email</span>
-                                <strong>{account?.email || '---'}</strong>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+                                <span style={{ color: 'var(--store-muted)', fontSize: '0.9rem' }}>Email</span>
+                                <strong style={{ fontSize: '0.92rem' }}>{account?.email || '---'}</strong>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                                <span>Vai trò</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+                                <span style={{ color: 'var(--store-muted)', fontSize: '0.9rem' }}>Vai trò</span>
                                 <Tag color="blue">{account?.role || 'Member'}</Tag>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                                <span>Địa chỉ mặc định</span>
-                                <strong style={{ textAlign: 'right' }}>{defaultAddress ? defaultAddress.formattedAddress : 'Chưa có'}</strong>
-                            </div>
+                            {defaultAddress && (
+                                <div style={{ display: 'grid', gap: 4, padding: '12px 14px', borderRadius: 14, background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.1)' }}>
+                                    <span style={{ color: 'var(--store-muted)', fontSize: '0.85rem', fontWeight: 700 }}>
+                                        <HomeOutlined /> Địa chỉ mặc định
+                                    </span>
+                                    <span style={{ fontSize: '0.9rem' }}>{defaultAddress.formattedAddress}</span>
+                                </div>
+                            )}
                         </div>
 
-                        <Divider />
+                        <Divider style={{ margin: '20px 0' }} />
 
                         <Space direction="vertical" style={{ width: '100%' }}>
-                            <Button type="primary" icon={<ShoppingOutlined />} block onClick={() => navigate('/orders')}>
-                                Xem lịch sử đơn hàng
+                            <Button type="primary" icon={<ShoppingOutlined />} block onClick={() => navigate('/orders')}
+                                style={{ borderRadius: 999, fontWeight: 700, background: 'linear-gradient(135deg, var(--store-primary), #7c3aed)', border: 0 }}>
+                                Xem đơn hàng
                             </Button>
-                            <Button icon={<HomeOutlined />} block onClick={() => navigate('/checkout')}>
+                            <Button icon={<HomeOutlined />} block onClick={() => navigate('/checkout')}
+                                style={{ borderRadius: 999 }}>
                                 Đi tới thanh toán
                             </Button>
                         </Space>
                     </Card>
                 </Col>
 
+                {/* Address List */}
                 <Col xs={24} lg={16}>
                     <Card
                         className="content-card"
                         bordered={false}
-                        title="Danh sách địa chỉ"
+                        title={
+                            <span style={{ fontWeight: 800, fontSize: '1rem' }}>
+                                <HomeOutlined style={{ marginRight: 8, color: 'var(--store-primary)' }} />
+                                Danh sách địa chỉ
+                            </span>
+                        }
                         extra={(
-                            <Button type="primary" icon={<PlusOutlined />} onClick={openCreateAddress}>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={openCreateAddress}
+                                style={{ borderRadius: 999, fontWeight: 700 }}>
                                 Thêm địa chỉ
                             </Button>
                         )}
@@ -259,29 +235,42 @@ const ProfilePage = () => {
                                         className="content-card"
                                         bordered={false}
                                         size="small"
-                                        style={{ height: '100%' }}
+                                        style={{
+                                            height: '100%',
+                                            border: address.isDefault ? '2px solid rgba(37,99,235,0.25)' : '1px solid var(--store-border)',
+                                            background: address.isDefault ? 'rgba(37,99,235,0.03)' : undefined,
+                                        }}
                                     >
                                         <Space direction="vertical" size={12} style={{ width: '100%' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                                                 <div>
-                                                    <strong>{address.label || 'Địa chỉ'}</strong>
-                                                    <p className="content-card__text" style={{ margin: '6px 0 0' }}>{address.recipientName} · {address.phone}</p>
+                                                    <strong style={{ fontSize: '0.97rem' }}>{address.label || 'Địa chỉ'}</strong>
+                                                    <p className="content-card__text" style={{ margin: '5px 0 0', fontSize: '0.88rem' }}>
+                                                        {address.recipientName} · {address.phone}
+                                                    </p>
                                                 </div>
                                                 {address.isDefault ? <Tag color="green">Mặc định</Tag> : null}
                                             </div>
 
                                             <div>
-                                                <p className="content-card__text" style={{ marginBottom: 6 }}>{address.formattedAddress}</p>
+                                                <p className="content-card__text" style={{ marginBottom: 6, fontSize: '0.88rem' }}>
+                                                    {address.formattedAddress}
+                                                </p>
                                                 {address.googleMapsLink ? (
-                                                    <a href={address.googleMapsLink} target="_blank" rel="noreferrer">Xem trên Google Maps</a>
+                                                    <a href={address.googleMapsLink} target="_blank" rel="noreferrer"
+                                                        style={{ fontSize: '0.85rem', color: 'var(--store-primary)', fontWeight: 600 }}>
+                                                        Xem bản đồ →
+                                                    </a>
                                                 ) : null}
                                             </div>
 
-                                            <Space wrap>
-                                                <Button icon={<EditOutlined />} onClick={() => openEditAddress(address)}>Sửa</Button>
-                                                <Button icon={<CheckOutlined />} onClick={() => handleSetDefault(address)} disabled={address.isDefault}>Đặt mặc định</Button>
+                                            <Space wrap size={6}>
+                                                <Button size="small" icon={<EditOutlined />} onClick={() => openEditAddress(address)}
+                                                    style={{ borderRadius: 999 }}>Sửa</Button>
+                                                <Button size="small" icon={<CheckOutlined />} onClick={() => handleSetDefault(address)}
+                                                    disabled={address.isDefault} style={{ borderRadius: 999 }}>Đặt mặc định</Button>
                                                 <Popconfirm title="Xóa địa chỉ này?" okText="Xóa" cancelText="Hủy" onConfirm={() => handleDeleteAddress(address)}>
-                                                    <Button danger icon={<DeleteOutlined />}>Xóa</Button>
+                                                    <Button size="small" danger icon={<DeleteOutlined />} style={{ borderRadius: 999 }}>Xóa</Button>
                                                 </Popconfirm>
                                             </Space>
                                         </Space>
@@ -294,7 +283,8 @@ const ProfilePage = () => {
                                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                                 style={{ padding: '24px 0' }}
                             >
-                                <Button type="primary" icon={<PlusOutlined />} onClick={openCreateAddress}>
+                                <Button type="primary" icon={<PlusOutlined />} onClick={openCreateAddress}
+                                    style={{ borderRadius: 999, fontWeight: 700 }}>
                                     Thêm địa chỉ đầu tiên
                                 </Button>
                             </Empty>
@@ -303,6 +293,7 @@ const ProfilePage = () => {
                 </Col>
             </Row>
 
+            {/* Address Modal */}
             <Modal
                 title={editingAddress ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}
                 open={addressModalOpen}
@@ -373,7 +364,7 @@ const ProfilePage = () => {
                         </Col>
                     </Row>
 
-                    <Form.Item name="detail" label="Địa chỉ chi tiết" rules={[{ required: true, message: 'Vui lòng nhập mô tả địa chỉ chi tiết' }]}>
+                    <Form.Item name="detail" label="Mô tả chi tiết" rules={[{ required: true, message: 'Vui lòng nhập mô tả địa chỉ chi tiết' }]}>
                         <Input.TextArea rows={3} placeholder="Tòa nhà, tầng, số căn hộ, mô tả thêm..." />
                     </Form.Item>
 
@@ -385,6 +376,7 @@ const ProfilePage = () => {
                         <Checkbox>Đặt làm địa chỉ mặc định</Checkbox>
                     </Form.Item>
 
+                    {/* Map Preview */}
                     <div className="map-preview">
                         <div className="map-preview__head">
                             <strong>Xem trước Google Maps</strong>
@@ -399,7 +391,7 @@ const ProfilePage = () => {
                                 referrerPolicy="no-referrer-when-downgrade"
                             />
                         ) : (
-                            <div className="map-preview__empty">Nhập địa chỉ chi tiết để xem bản đồ</div>
+                            <div className="map-preview__empty">Nhập địa chỉ để xem bản đồ</div>
                         )}
                     </div>
                 </Form>

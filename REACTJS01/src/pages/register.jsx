@@ -16,7 +16,7 @@ const RegisterPage = () => {
     const [sendingOtp, setSendingOtp] = useState(false);
     const [verifyingOtp, setVerifyingOtp] = useState(false);
 
-    const stepLabel = useMemo(() => (step === 1 ? 'Step 1: account information' : 'Step 2: OTP verification'), [step]);
+    const stepLabel = useMemo(() => (step === 1 ? 'Bước 1: Thông tin cá nhân' : 'Bước 2: Xác minh mã OTP'), [step]);
 
     const handleSendOtp = async (values) => {
         setSendingOtp(true);
@@ -27,23 +27,23 @@ const RegisterPage = () => {
             setPendingRegister(values);
             setStep(2);
             notification.success({
-                message: 'Registration OTP sent',
-                description: 'Please check your OTP to continue.',
+                message: 'Đã gửi mã OTP',
+                description: 'Vui lòng kiểm tra email của bạn để nhận mã xác thực.',
             });
             return;
         }
 
         notification.error({
-            message: 'Unable to send OTP',
-            description: res?.EM ?? 'error',
+            message: 'Không thể gửi mã OTP',
+            description: res?.EM ?? 'Đã xảy ra lỗi khi gửi mã OTP!',
         });
     };
 
     const handleVerifyOtp = async (values) => {
         if (!pendingRegister) {
             notification.error({
-                message: 'Missing registration data',
-                description: 'Please go back to the first step.',
+                message: 'Thiếu thông tin đăng ký',
+                description: 'Vui lòng quay lại bước đầu tiên.',
             });
             setStep(1);
             return;
@@ -58,8 +58,8 @@ const RegisterPage = () => {
 
         if (res && res.EC === 0) {
             notification.success({
-                message: 'Registration successful',
-                description: 'Your account has been created, please sign in.',
+                message: 'Đăng ký thành công',
+                description: 'Tài khoản của bạn đã được khởi tạo thành công. Vui lòng đăng nhập.',
             });
             form.resetFields();
             setPendingRegister(null);
@@ -69,8 +69,8 @@ const RegisterPage = () => {
         }
 
         notification.error({
-            message: 'OTP verification failed',
-            description: res?.EM ?? 'error',
+            message: 'Xác thực OTP thất bại',
+            description: res?.EM ?? 'Mã OTP không chính xác hoặc đã hết hạn!',
         });
     };
 
@@ -92,18 +92,18 @@ const RegisterPage = () => {
 
     return (
         <AuthLayout
-            title="Register"
+            title="Đăng ký"
             description={stepLabel}
             footer={(
                 <Space direction="vertical" size={10} className="auth-card__footer-block">
                     <div className="auth-card__links auth-card__links--single">
                         <Link to="/">
-                            <ArrowLeftOutlined /> Back to home
+                            <ArrowLeftOutlined /> Quay lại trang chủ
                         </Link>
-                        <Link to="/login">Login</Link>
+                        <Link to="/login">Đăng nhập</Link>
                     </div>
                     <div className="auth-card__footer" style={{ textAlign: 'center' }}>
-                        Already have an account? <Link to="/login">Sign in now</Link>
+                        Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
                     </div>
                 </Space>
             )}
@@ -112,45 +112,45 @@ const RegisterPage = () => {
                 {step === 1 ? (
                     <>
                         <Form.Item
-                            label="Full name"
+                            label="Họ và tên"
                             name="name"
-                            rules={[{ required: true, message: 'Please enter your full name' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập đầy đủ họ và tên của bạn!' }]}
                         >
-                            <Input prefix={<UserOutlined />} placeholder="John Doe" />
+                            <Input prefix={<UserOutlined />} placeholder="Ví dụ: Nguyễn Văn A" />
                         </Form.Item>
 
                         <Form.Item
                             label="Email"
                             name="email"
-                            rules={[{ required: true, message: 'Please enter your email' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập địa chỉ email!' }]}
                         >
                             <Input prefix={<MailOutlined />} placeholder="your@email.com" />
                         </Form.Item>
 
                         <Form.Item
-                            label="Password"
+                            label="Mật khẩu"
                             name="password"
-                            rules={[{ required: true, message: 'Please enter your password' }]}
+                            rules={[{ required: true, message: 'Vui lòng tạo một mật khẩu!' }]}
                         >
-                            <Input.Password prefix={<LockOutlined />} placeholder="Create a password" />
+                            <Input.Password prefix={<LockOutlined />} placeholder="Tạo mật khẩu của bạn" />
                         </Form.Item>
                     </>
                 ) : (
                     <>
                         <Form.Item
-                            label="Verification OTP"
+                            label="Mã xác thực OTP"
                             name="otp"
-                            rules={[{ required: true, message: 'Please enter the OTP' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã OTP đã nhận!' }]}
                         >
                             <Input.OTP length={6} />
                         </Form.Item>
 
                         <div className="auth-inline-actions">
                             <Button onClick={resendOtp} loading={sendingOtp}>
-                                Resend OTP
+                                Gửi lại OTP
                             </Button>
                             <Button onClick={() => setStep(1)}>
-                                Back
+                                Quay lại
                             </Button>
                         </div>
                     </>
@@ -158,7 +158,7 @@ const RegisterPage = () => {
 
                 <Form.Item className="auth-form__submit">
                     <Button type="primary" htmlType="submit" block className="auth-gradient-btn" loading={sendingOtp || verifyingOtp}>
-                        {step === 1 ? 'Send OTP' : 'Verify and register'}
+                        {step === 1 ? 'Gửi mã OTP' : 'Xác thực & Đăng ký'}
                     </Button>
                 </Form.Item>
             </Form>

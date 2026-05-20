@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Header from "./components/layout/header";
+import Footer from "./components/layout/footer";
 
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
@@ -56,7 +57,7 @@ function App() {
     }, [setAuth, setAppLoading])
 
     return (
-        <div>
+        <div className="app-root">
 
             {appLoading === true ?
 
@@ -67,15 +68,18 @@ function App() {
                     transform: "translate(-50%, -50%)"
                 }}>
 
-                    <Spin />
+                    <Spin size="large" />
 
                 </div>
 
                 :
 
                 <>
-                        {isAdminRoute ? null : <Header />}
-                    <Outlet />
+                    {isAdminRoute ? null : <Header />}
+                    <main className="app-main">
+                        <Outlet />
+                    </main>
+                    {isAdminRoute ? null : <Footer />}
                 </>
             }
 

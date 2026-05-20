@@ -12,7 +12,7 @@ const ForgotPasswordPage = () => {
     const [sendingOtp, setSendingOtp] = useState(false);
     const [resetting, setResetting] = useState(false);
 
-    const stepLabel = useMemo(() => (step === 1 ? 'Enter your email to receive an OTP' : 'Enter OTP and new password'), [step]);
+    const stepLabel = useMemo(() => (step === 1 ? 'Nhập email để nhận mã OTP khôi phục' : 'Nhập mã OTP và thiết lập mật khẩu mới'), [step]);
 
     const handleRequestOtp = async (values) => {
         setSendingOtp(true);
@@ -23,23 +23,23 @@ const ForgotPasswordPage = () => {
             setPendingEmail(values.email);
             setStep(2);
             notification.success({
-                message: 'OTP sent',
-                description: 'Please check your OTP to continue.',
+                message: 'Đã gửi mã OTP',
+                description: 'Vui lòng kiểm tra email của bạn để nhận mã khôi phục mật khẩu.',
             });
             return;
         }
 
         notification.error({
-            message: 'Unable to send OTP',
-            description: res?.EM ?? 'error',
+            message: 'Không thể gửi mã OTP',
+            description: res?.EM ?? 'Đã xảy ra lỗi khi gửi mã OTP!',
         });
     };
 
     const handleResetPassword = async (values) => {
         if (!pendingEmail) {
             notification.error({
-                message: 'Missing email',
-                description: 'Please go back to the first step.',
+                message: 'Thiếu thông tin email',
+                description: 'Vui lòng quay lại bước đầu tiên.',
             });
             setStep(1);
             return;
@@ -47,8 +47,8 @@ const ForgotPasswordPage = () => {
 
         if (values.password !== values.confirmPassword) {
             notification.error({
-                message: 'Passwords do not match',
-                description: 'Please check your new password again.',
+                message: 'Mật khẩu không khớp',
+                description: 'Mật khẩu xác nhận phải trùng khớp với mật khẩu mới.',
             });
             return;
         }
@@ -63,8 +63,8 @@ const ForgotPasswordPage = () => {
 
         if (res && res.EC === 0) {
             notification.success({
-                message: 'Password reset successful',
-                description: 'You can now sign in with your new password.',
+                message: 'Đặt lại mật khẩu thành công',
+                description: 'Mật khẩu của bạn đã được cập nhật. Vui lòng đăng nhập bằng mật khẩu mới.',
             });
             form.resetFields();
             setPendingEmail('');
@@ -73,8 +73,8 @@ const ForgotPasswordPage = () => {
         }
 
         notification.error({
-            message: 'Unable to reset password',
-            description: res?.EM ?? 'error',
+            message: 'Đặt lại mật khẩu thất bại',
+            description: res?.EM ?? 'Mã OTP không chính xác hoặc đã hết hạn!',
         });
     };
 
@@ -96,18 +96,18 @@ const ForgotPasswordPage = () => {
 
     return (
         <AuthLayout
-            title="Forgot password"
+            title="Quên mật khẩu"
             description={stepLabel}
             footer={(
                 <Space direction="vertical" size={10} className="auth-card__footer-block">
                     <div className="auth-card__links auth-card__links--single">
                         <Link to="/login">
-                            <ArrowLeftOutlined /> Back to sign in
+                            <ArrowLeftOutlined /> Quay lại đăng nhập
                         </Link>
-                        <Link to="/register">Create new account</Link>
+                        <Link to="/register">Tạo tài khoản mới</Link>
                     </div>
                     <div className="auth-card__footer" style={{ textAlign: 'center' }}>
-                        Remembered your password? <Link to="/login">Sign in now</Link>
+                        Đã nhớ mật khẩu? <Link to="/login">Đăng nhập ngay</Link>
                     </div>
                 </Space>
             )}
@@ -117,42 +117,42 @@ const ForgotPasswordPage = () => {
                     <Form.Item
                         label="Email"
                         name="email"
-                        rules={[{ required: true, message: 'Please enter your email' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ email!' }]}
                     >
                         <Input prefix={<MailOutlined />} placeholder="your@email.com" />
                     </Form.Item>
                 ) : (
                     <>
                         <Form.Item
-                            label="Verification OTP"
+                            label="Mã xác thực OTP"
                             name="otp"
-                            rules={[{ required: true, message: 'Please enter the OTP' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mã OTP đã nhận!' }]}
                         >
                             <Input.OTP length={6} />
                         </Form.Item>
 
                         <Form.Item
-                            label="New password"
+                            label="Mật khẩu mới"
                             name="password"
-                            rules={[{ required: true, message: 'Please enter your new password' }]}
+                            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới!' }]}
                         >
-                            <Input.Password prefix={<LockOutlined />} placeholder="Enter your new password" />
+                            <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu mới của bạn" />
                         </Form.Item>
 
                         <Form.Item
-                            label="Confirm password"
+                            label="Xác nhận mật khẩu"
                             name="confirmPassword"
-                            rules={[{ required: true, message: 'Please confirm your password' }]}
+                            rules={[{ required: true, message: 'Vui lòng xác nhận lại mật khẩu!' }]}
                         >
-                            <Input.Password prefix={<LockOutlined />} placeholder="Re-enter your new password" />
+                            <Input.Password prefix={<LockOutlined />} placeholder="Nhập lại mật khẩu mới" />
                         </Form.Item>
 
                         <div className="auth-inline-actions">
                             <Button onClick={resendOtp} loading={sendingOtp}>
-                                Resend OTP
+                                Gửi lại OTP
                             </Button>
                             <Button onClick={() => setStep(1)}>
-                                Back
+                                Quay lại
                             </Button>
                         </div>
                     </>
@@ -160,7 +160,7 @@ const ForgotPasswordPage = () => {
 
                 <Form.Item className="auth-form__submit">
                     <Button type="primary" htmlType="submit" block className="auth-gradient-btn" loading={sendingOtp || resetting}>
-                        {step === 1 ? 'Send OTP' : 'Reset password'}
+                        {step === 1 ? 'Gửi mã OTP' : 'Đặt lại mật khẩu'}
                     </Button>
                 </Form.Item>
             </Form>

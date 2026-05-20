@@ -3,6 +3,7 @@ import { Avatar, Button, Dropdown, Input, Space, Tag } from 'antd';
 import { AppstoreOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, SearchOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/auth.context';
+import { logoutApi } from '../../util/api';
 
 const Header = () => {
 
@@ -27,8 +28,15 @@ const Header = () => {
         navigate('/products');
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            await logoutApi();
+        } catch (error) {
+            console.log("Error logging out from server:", error);
+        }
+
         localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         setAuth({
             isAuthenticated: false,
             user: {
@@ -68,7 +76,7 @@ const Header = () => {
                 ),
             },
             { type: 'divider' },
-              {
+            {
                 key: 'orders',
                 label: <Link to="/orders">Đơn hàng của tôi</Link>,
             },

@@ -9,7 +9,7 @@ import PromotionsAdmin from '../components/admin/promotions-admin';
 import ProductsAdmin from '../components/admin/products-admin';
 import OrdersAdmin from '../components/admin/orders-admin';
 import PostsAdmin from '../components/admin/posts-admin';
-import { getCategoriesApi, getOrdersApi, getPostsApi, getProductsApi, getPromotionsApi, getUserApi } from '../util/api';
+import { getCategoriesApi, getOrdersApi, getPostsApi, getProductsApi, getPromotionsApi, getUserApi, logoutApi } from '../util/api';
 import { normalizeCollection } from '../components/admin/admin-utils';
 
 const sectionMeta = {
@@ -93,8 +93,15 @@ const AdminPage = () => {
         loadOverview();
     }, []);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            await logoutApi();
+        } catch (error) {
+            console.log("Error logging out from server:", error);
+        }
+
         localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         setAuth({
             isAuthenticated: false,
             user: {

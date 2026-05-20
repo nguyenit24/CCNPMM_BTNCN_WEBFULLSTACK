@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Switch, Table, Tag, notification } from 'antd';
+import { useEffect, useState, useMemo } from 'react';
+import { Button, Form, Input, InputNumber, Modal, Popconfirm, Space, Table, Card, Tag, notification } from 'antd';
+import { SearchOutlined, GiftOutlined, FileImageOutlined, EditOutlined, DeleteOutlined, PercentageOutlined } from '@ant-design/icons';
 import { createPromotionApi, deletePromotionApi, getPromotionsApi, updatePromotionApi } from '../../util/api';
 import AdminCard from './admin-card';
 
 const { TextArea } = Input;
+const PAGE_SIZE = 8;
 
 const PromotionsAdmin = () => {
     const [form] = Form.useForm();
@@ -11,15 +13,25 @@ const PromotionsAdmin = () => {
     const [loading, setLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(PAGE_SIZE);
+    const [total, setTotal] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [imagePreviewUrl, setImagePreviewUrl] = useState('');
 
-    const loadPromotions = async () => {
+    const loadPromotions = async (nextPage = 1, nextPageSize = pageSize) => {
         setLoading(true);
-        const res = await getPromotionsApi();
+        const res = await getPromotionsApi({ page: nextPage, limit: nextPageSize });
         if (res?.message) {
-            notification.error({ message: 'Load promotions', description: res.message });
+            notification.error({ message: 'Tải khuyến mãi thất bại', description: res.message });
             setItems([]);
+            setTotal(0);
         } else {
-            setItems(Array.isArray(res) ? res : []);
+            const nextItems = Array.isArray(res?.items) ? res.items : Array.isArray(res) ? res : [];
+            setItems(nextItems);
+            setTotal(Number(res?.total ?? nextItems.length));
+            setPage(nextPage);
+            setPageSize(nextPageSize);
         }
         setLoading(false);
     };
@@ -30,22 +42,23 @@ const PromotionsAdmin = () => {
 
     const openCreate = () => {
         setEditing(null);
+        setImagePreviewUrl('');
         form.resetFields();
+        form.setFieldsValue({ discountPercent: 0, order: 0 });
         setModalOpen(true);
     };
 
     const openEdit = (record) => {
         setEditing(record);
+        setImagePreviewUrl(record.image || '');
         form.setFieldsValue({
             title: record.title,
             slug: record.slug,
-            badge: record.badge,
             description: record.description,
-            highlight: record.highlight,
-            buttonLabel: record.buttonLabel,
-            banner: record.banner,
+            image: record.image,
+            discountPercent: record.discountPercent,
+            discountCode: record.discountCode,
             order: record.order,
-            active: Boolean(record.active),
         });
         setModalOpen(true);
     };
@@ -57,16 +70,16 @@ const PromotionsAdmin = () => {
                 throw new Error(res.message);
             }
             notification.success({
-                message: editing ? 'Update promotion' : 'Create promotion',
-                description: 'Success',
+                message: editing ? 'Cập nhật khuyến mãi' : 'Tạo khuyến mãi mới',
+                description: 'Lưu dữ liệu thành công!',
             });
             setModalOpen(false);
             form.resetFields();
-            loadPromotions();
+            loadPromotions(page, pageSize);
         } catch (error) {
             notification.error({
-                message: editing ? 'Update promotion' : 'Create promotion',
-                description: error.message || 'Request failed',
+                message: editing ? 'Cập nhật khuyến mãi thất bại' : 'Tạo khuyến mãi thất bại',
+                description: error.message || 'Yêu cầu không thành công',
             });
         }
     };
@@ -74,33 +87,110 @@ const PromotionsAdmin = () => {
     const handleDelete = async (record) => {
         const res = await deletePromotionApi(record.slug);
         if (res?.message) {
-            notification.error({ message: 'Delete promotion', description: res.message });
+            notification.error({ message: 'Xóa khuyến mãi thất bại', description: res.message });
             return;
         }
-        notification.success({ message: 'Delete promotion', description: 'Success' });
-        loadPromotions();
+        notification.success({ message: 'Xóa khuyến mãi', description: 'Đã gỡ chương trình thành công!' });
+        loadPromotions(page, pageSize);
     };
 
+    const filteredItems = useMemo(() => {
+        const query = String(searchQuery || '').trim().toLowerCase();
+        if (!query) return items;
+        return items.filter(
+            (item) =>
+                String(item.title || '').toLowerCase().includes(query) ||
+                String(item.discountCode || '').toLowerCase().includes(query)
+        );
+    }, [items, searchQuery]);
+
     const columns = [
-        { title: 'Title', dataIndex: 'title' },
-        { title: 'Slug', dataIndex: 'slug' },
         {
-            title: 'Active',
-            dataIndex: 'active',
-            render: (value) => (value ? <Tag color="green">Active</Tag> : <Tag>Off</Tag>),
+            title: 'Banner',
+            dataIndex: 'image',
+            key: 'image',
+            width: 160,
+            render: (url) => (
+                <div className="admin-table-image-container admin-table-image-container--wide">
+                    <img
+                        src={url || 'https://placehold.co/320x180?text=No+Banner'}
+                        alt="Promotion"
+                        className="admin-table-image"
+                        onError={(e) => {
+                            e.target.src = 'https://placehold.co/320x180?text=Error';
+                        }}
+                    />
+                </div>
+            ),
         },
-        { title: 'Order', dataIndex: 'order' },
         {
-            title: 'Action',
+            title: 'Tiêu đề khuyến mãi',
+            dataIndex: 'title',
+            key: 'title',
+            sorter: (a, b) => String(a.title || '').localeCompare(String(b.title || '')),
+            render: (title) => <strong style={{ color: 'var(--store-text)', fontSize: '0.95rem' }}>{title}</strong>,
+        },
+        {
+            title: 'Mã giảm giá',
+            dataIndex: 'discountCode',
+            key: 'discountCode',
+            render: (code) => code ? (
+                <Tag color="volcano" style={{ borderRadius: 8, padding: '2px 10px', fontWeight: 800 }}>
+                    {code.toUpperCase()}
+                </Tag>
+            ) : <span style={{ color: 'var(--store-muted)' }}>---</span>,
+        },
+        {
+            title: 'Phần trăm giảm',
+            dataIndex: 'discountPercent',
+            key: 'discountPercent',
+            sorter: (a, b) => (a.discountPercent || 0) - (b.discountPercent || 0),
+            render: (pct) => pct ? (
+                <Tag color="green" style={{ borderRadius: 8, padding: '2px 8px', fontWeight: 700 }}>
+                    -{pct}%
+                </Tag>
+            ) : <span style={{ color: 'var(--store-muted)' }}>0%</span>,
+        },
+        {
+            title: 'Độ ưu tiên',
+            dataIndex: 'order',
+            key: 'order',
+            sorter: (a, b) => (a.order || 0) - (b.order || 0),
+            render: (ord) => <span style={{ fontWeight: 700 }}>{ord}</span>,
+        },
+        {
+            title: 'Thao tác',
             key: 'action',
+            width: 180,
             render: (_, record) => (
-                <Space>
-                    <Button size="small" type="primary" onClick={() => openEdit(record)}>
-                        Edit
+                <Space size="middle">
+                    <Button
+                        size="middle"
+                        type="primary"
+                        ghost
+                        icon={<EditOutlined />}
+                        onClick={() => openEdit(record)}
+                        style={{ borderRadius: 10 }}
+                    >
+                        Sửa
                     </Button>
-                    <Popconfirm title="Delete promotion?" onConfirm={() => handleDelete(record)}>
-                        <Button size="small" danger>
-                            Delete
+                    <Popconfirm
+                        title="Xác nhận xóa chương trình khuyến mãi này?"
+                        onConfirm={() => handleDelete(record)}
+                        okText="Xóa"
+                        cancelText="Hủy"
+                        okButtonProps={{ danger: true, shape: 'round' }}
+                        cancelButtonProps={{ shape: 'round' }}
+                    >
+                        <Button
+                            size="middle"
+                            danger
+                            type="primary"
+                            ghost
+                            icon={<DeleteOutlined />}
+                            style={{ borderRadius: 10 }}
+                        >
+                            Xóa
                         </Button>
                     </Popconfirm>
                 </Space>
@@ -109,60 +199,121 @@ const PromotionsAdmin = () => {
     ];
 
     return (
-        <AdminCard title="Promotions" onReload={loadPromotions} onCreate={openCreate}>
+        <AdminCard title="Khuyến mãi & Banners" onReload={() => loadPromotions(page, pageSize)} onCreate={openCreate}>
+            <Card style={{ marginBottom: 20, borderRadius: 20 }} bodyStyle={{ padding: 16 }} bordered={false} className="glass-card">
+                <Input
+                    placeholder="Tìm kiếm chương trình theo tiêu đề hoặc mã giảm giá..."
+                    prefix={<SearchOutlined style={{ color: 'var(--store-muted)' }} />}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    allowClear
+                    size="large"
+                    style={{ borderRadius: 12 }}
+                />
+            </Card>
+
             <Table
-                className="admin-table"
+                className="admin-table custom-premium-table"
                 rowKey="slug"
                 columns={columns}
-                dataSource={items}
+                dataSource={filteredItems}
                 loading={loading}
-                pagination={{ pageSize: 8 }}
+                pagination={{
+                    current: page,
+                    pageSize,
+                    total,
+                    showSizeChanger: false,
+                    onChange: (nextPage, nextPageSize) => loadPromotions(nextPage, nextPageSize),
+                    showTotal: (total, range) => `Hiển thị ${range[0]}-${range[1]} trên tổng số ${total} chương trình`,
+                }}
+                style={{ borderRadius: 20, overflow: 'hidden' }}
             />
 
             <Modal
-                className="admin-modal"
-                title={editing ? 'Edit promotion' : 'Create promotion'}
+                className="admin-modal premium-modal"
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '1.2rem', fontWeight: 700 }}>
+                        <GiftOutlined style={{ color: 'var(--store-primary)' }} />
+                        {editing ? 'Cập nhật khuyến mãi' : 'Tạo khuyến mãi mới'}
+                    </div>
+                }
                 open={modalOpen}
                 onCancel={() => {
                     setModalOpen(false);
                     form.resetFields();
                 }}
                 onOk={() => form.submit()}
-                okText={editing ? 'Save' : 'Create'}
+                okText={editing ? 'Lưu thay đổi' : 'Tạo chương trình'}
+                cancelText="Hủy bỏ"
                 destroyOnClose
-                width={720}
+                bodyStyle={{ paddingTop: 16 }}
+                okButtonProps={{ style: { borderRadius: 12, height: 40, paddingLeft: 24, paddingRight: 24 } }}
+                cancelButtonProps={{ style: { borderRadius: 12, height: 40 } }}
             >
-                <Form form={form} layout="vertical" onFinish={handleSubmit} className="admin-modal-form admin-form-grid">
+                <Form form={form} layout="vertical" onFinish={handleSubmit} className="admin-modal-form">
                     <Form.Item
                         name="title"
-                        label="Title"
-                        rules={[{ required: true, message: 'Title is required' }]}
+                        label={<strong>Tiêu đề khuyến mãi / Tên Banner</strong>}
+                        rules={[{ required: true, message: 'Vui lòng nhập tiêu đề khuyến mãi!' }]}
                     >
-                        <Input />
+                        <Input placeholder="Ví dụ: Siêu hội tai nghe - Giảm sâu 40%" style={{ borderRadius: 10 }} size="large" />
                     </Form.Item>
-                    <Form.Item name="slug" label="Slug">
-                        <Input />
+
+                    <Form.Item name="slug" label={<strong>Đường dẫn (Slug)</strong>} extra="Để trống hệ thống sẽ tự sinh từ tiêu đề">
+                        <Input placeholder="Ví dụ: sieu-hoi-tai-nghe" style={{ borderRadius: 10 }} size="large" />
                     </Form.Item>
-                    <Form.Item name="badge" label="Badge">
-                        <Input />
+
+                    <Form.Item name="description" label={<strong>Nội dung chương trình</strong>}>
+                        <TextArea rows={3} placeholder="Mô tả các điều kiện hoặc nội dung của chương trình..." style={{ borderRadius: 10 }} />
                     </Form.Item>
-                    <Form.Item name="buttonLabel" label="Button Label">
-                        <Input />
+
+                    <Form.Item
+                        name="image"
+                        label={<strong>Đường dẫn hình ảnh Banner (Tỉ lệ khuyến nghị 16:9)</strong>}
+                        rules={[{ required: true, message: 'Vui lòng điền link ảnh banner' }]}
+                    >
+                        <Input
+                            prefix={<FileImageOutlined />}
+                            placeholder="https://..."
+                            style={{ borderRadius: 10 }}
+                            size="large"
+                            value={imagePreviewUrl}
+                            onChange={(e) => setImagePreviewUrl(e.target.value)}
+                        />
                     </Form.Item>
-                    <Form.Item name="banner" label="Banner URL" className="admin-form__wide">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="description" label="Description" className="admin-form__wide">
-                        <TextArea rows={3} />
-                    </Form.Item>
-                    <Form.Item name="highlight" label="Highlight" className="admin-form__wide">
-                        <TextArea rows={2} />
-                    </Form.Item>
-                    <Form.Item name="order" label="Order">
-                        <InputNumber min={0} style={{ width: '100%' }} />
-                    </Form.Item>
-                    <Form.Item name="active" label="Active" valuePropName="checked">
-                        <Switch />
+
+                    {imagePreviewUrl ? (
+                        <div style={{ marginBottom: 20, textAlign: 'center' }}>
+                            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--store-muted)', marginBottom: 8 }}>Xem trước Banner:</span>
+                            <img
+                                src={imagePreviewUrl}
+                                alt="Banner Preview"
+                                style={{ width: '100%', maxHeight: '160px', borderRadius: 12, objectFit: 'cover', boxShadow: '0 8px 16px rgba(0,0,0,0.08)' }}
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                }}
+                            />
+                        </div>
+                    ) : null}
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                        <Form.Item name="discountCode" label={<strong>Mã giảm giá (Coupon)</strong>}>
+                            <Input placeholder="Ví dụ: TECH40" style={{ borderRadius: 10 }} size="large" />
+                        </Form.Item>
+
+                        <Form.Item name="discountPercent" label={<strong>Phần trăm giảm (%)</strong>}>
+                            <InputNumber
+                                min={0}
+                                max={100}
+                                style={{ width: '100%', borderRadius: 10 }}
+                                size="large"
+                                prefix={<PercentageOutlined />}
+                            />
+                        </Form.Item>
+                    </div>
+
+                    <Form.Item name="order" label={<strong>Thứ tự hiển thị</strong>}>
+                        <InputNumber min={0} style={{ width: '100%', borderRadius: 10 }} size="large" />
                     </Form.Item>
                 </Form>
             </Modal>

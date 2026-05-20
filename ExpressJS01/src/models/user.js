@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     password: String,
     role: { type: String, default: 'Member' },
     addresses: { type: [addressSchema], default: [] },
+    refreshToken: { type: String, default: '' },
 });
 
 const User = mongoose.model('user', userSchema);

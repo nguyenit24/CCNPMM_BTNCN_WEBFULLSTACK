@@ -330,6 +330,16 @@ const deletePostApi = (slug) => {
     return axios.delete(URL_API)
 }
 
+const refreshTokenApi = (refreshToken) => {
+    const URL_API = "/v1/api/auth/refresh";
+    return axios.post(URL_API, { refreshToken });
+}
+
+const logoutApi = () => {
+    const URL_API = "/v1/api/auth/logout";
+    return axios.post(URL_API);
+}
+
 export {
     createUserApi,
     requestRegisterOtpApi,
@@ -377,4 +387,6 @@ export {
     createPostApi,
     updatePostApi,
     deletePostApi,
+    refreshTokenApi,
+    logoutApi,
 }

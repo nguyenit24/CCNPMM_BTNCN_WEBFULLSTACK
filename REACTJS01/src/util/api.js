@@ -204,6 +204,41 @@ const getProductDetailApi = (slug) => {
     return axios.get(URL_API)
 }
 
+const getCartApi = () => {
+
+    const URL_API = "/v1/api/cart";
+
+    return axios.get(URL_API)
+}
+
+const addCartItemApi = (data = {}) => {
+
+    const URL_API = "/v1/api/cart/items";
+
+    return axios.post(URL_API, data)
+}
+
+const updateCartItemApi = (slug, data = {}) => {
+
+    const URL_API = `/v1/api/cart/items/${slug}`;
+
+    return axios.put(URL_API, data)
+}
+
+const removeCartItemApi = (slug) => {
+
+    const URL_API = `/v1/api/cart/items/${slug}`;
+
+    return axios.delete(URL_API)
+}
+
+const clearCartApi = () => {
+
+    const URL_API = "/v1/api/cart";
+
+    return axios.delete(URL_API)
+}
+
 const getPostDetailApi = (slug) => {
 
     const URL_API = `/v1/api/posts/${slug}`;
@@ -268,6 +303,11 @@ export {
     updateProductApi,
     deleteProductApi,
     getProductDetailApi,
+    getCartApi,
+    addCartItemApi,
+    updateCartItemApi,
+    removeCartItemApi,
+    clearCartApi,
     getPostsApi,
     getPostDetailApi,
     createPostApi,

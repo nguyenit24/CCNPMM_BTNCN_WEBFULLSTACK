@@ -89,6 +89,7 @@ const AdminPage = () => {
         setAuth({
             isAuthenticated: false,
             user: {
+                id: '',
                 email: '',
                 name: '',
                 role: 'Member',

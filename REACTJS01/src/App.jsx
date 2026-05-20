@@ -26,6 +26,7 @@ function App() {
                 setAuth({
                     isAuthenticated: true,
                     user: {
+                        id: res.id ?? "",
                         email: res.email,
                         name: res.name,
                         role: res.role || "Member"
@@ -35,6 +36,7 @@ function App() {
                 setAuth({
                     isAuthenticated: false,
                     user: {
+                        id: "",
                         email: "",
                         name: "",
                         role: "Member"

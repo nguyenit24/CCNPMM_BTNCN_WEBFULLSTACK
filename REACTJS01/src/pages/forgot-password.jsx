@@ -97,6 +97,7 @@ const ForgotPasswordPage = () => {
     return (
         <AuthLayout
             title="Forgot password"
+            description={stepLabel}
             footer={(
                 <Space direction="vertical" size={10} className="auth-card__footer-block">
                     <div className="auth-card__links auth-card__links--single">
@@ -111,10 +112,6 @@ const ForgotPasswordPage = () => {
                 </Space>
             )}
         >
-            <div className="auth-card__head">
-                <h2 className="auth-card__title">{stepLabel}</h2>
-            </div>
-
             <Form form={form} name="forgot-password-form" onFinish={onFinish} autoComplete="off" layout="vertical" size="large">
                 {step === 1 ? (
                     <Form.Item

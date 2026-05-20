@@ -45,6 +45,13 @@ const {
     updateProduct,
     deleteProduct,
 } = require('../controllers/productController');
+const {
+    getCart,
+    addCartItem,
+    updateCartItem,
+    removeCartItem,
+    clearCart,
+} = require('../controllers/cartController');
 const { authenticate, authorizeRoles } = require('../middleware/auth');
 const delay = require('../middleware/delay');
 
@@ -80,6 +87,11 @@ routerAPI.get("/products/:slug", getProductDetail);
 routerAPI.use(authenticate);
 
 routerAPI.get("/account", delay, getAccount);
+routerAPI.get("/cart", getCart);
+routerAPI.post("/cart/items", addCartItem);
+routerAPI.put("/cart/items/:slug", updateCartItem);
+routerAPI.delete("/cart/items/:slug", removeCartItem);
+routerAPI.delete("/cart", clearCart);
 
 routerAPI.get("/user", authorizeRoles('Admin'), getUser);
 routerAPI.get("/user/:id", authorizeRoles('Admin'), getUserDetail);

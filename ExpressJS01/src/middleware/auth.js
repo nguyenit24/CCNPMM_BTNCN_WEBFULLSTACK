@@ -1,5 +1,6 @@
 require('dotenv').config()
 const jwt = require("jsonwebtoken");
+const User = require('../models/user');
 
 const authenticate = (req, res, next) => {
     if (req.headers.authorization?.split(' ')[1]) {
@@ -7,12 +8,38 @@ const authenticate = (req, res, next) => {
 
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = {
-                email: decoded.email,
-                name: decoded.name,
-                role: decoded.role || "Member"
-            }
-            next();
+            const attachUser = async () => {
+                if (decoded.id) {
+                    req.user = {
+                        id: decoded.id,
+                        email: decoded.email,
+                        name: decoded.name,
+                        role: decoded.role || "Member"
+                    };
+                    return next();
+                }
+
+                const user = await User.findOne({ email: decoded.email }).lean();
+                if (!user) {
+                    return res.status(401).json({
+                        message: "Token bị hết hạn/hoặc không hợp lệ"
+                    });
+                }
+
+                req.user = {
+                    id: user._id.toString(),
+                    email: user.email,
+                    name: user.name,
+                    role: user.role || "Member"
+                };
+                return next();
+            };
+
+            attachUser().catch(() => {
+                return res.status(401).json({
+                    message: "Token bị hết hạn/hoặc không hợp lệ"
+                });
+            });
         } catch (error) {
             return res.status(401).json({
                 message: "Token bị hết hạn/hoặc không hợp lệ"

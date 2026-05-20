@@ -18,6 +18,7 @@ import LoginPage from './pages/login.jsx';
 import ForgotPasswordPage from './pages/forgot-password.jsx';
 import ProductsPage from './pages/products.jsx';
 import ProductDetailPage from './pages/product-detail.jsx';
+import CartPage from './pages/cart.jsx';
 import PostDetailPage from './pages/post-detail.jsx';
 import PostsPage from './pages/posts.jsx';
 import ProfilePage from './pages/profile.jsx';
@@ -33,6 +34,14 @@ const router = createBrowserRouter(
                 <Route index element={<HomePage />} />
                 <Route path="products" element={<ProductsPage />} />
                 <Route path="products/:slug" element={<ProductDetailPage />} />
+                <Route
+                    path="cart"
+                    element={(
+                        <ProtectedRoute>
+                            <CartPage />
+                        </ProtectedRoute>
+                    )}
+                />
                 <Route path="posts" element={<PostsPage />} />
                 <Route path="posts/:slug" element={<PostDetailPage />} />
                 <Route

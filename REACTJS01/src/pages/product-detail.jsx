@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button, Empty, Result, Spin, Tag, notification } from 'antd';
 import { MinusOutlined, PlusOutlined, StarFilled } from '@ant-design/icons';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import ProductCard from '../components/catalog/product-card';
-import { getProductDetailApi } from '../util/api';
+import { addCartItemApi, getProductDetailApi } from '../util/api';
+import { AuthContext } from '../components/context/auth.context';
 
 const moneyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -12,14 +13,18 @@ const moneyFormatter = new Intl.NumberFormat('en-US', {
 
 const ProductDetailPage = () => {
     const { slug } = useParams();
+    const navigate = useNavigate();
+    const { auth } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
+    const [addingToCart, setAddingToCart] = useState(false);
 
     useEffect(() => {
         const fetchDetail = async () => {
             setLoading(true);
+            setAddingToCart(false);
             setQuantity(1);
             setActiveImageIndex(0);
 
@@ -38,6 +43,34 @@ const ProductDetailPage = () => {
 
         fetchDetail();
     }, [slug]);
+
+    const handleAddToCart = async () => {
+        if (!auth?.isAuthenticated) {
+            notification.info({
+                message: 'Bạn cần đăng nhập',
+                description: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.',
+            });
+            navigate('/login');
+            return;
+        }
+
+        setAddingToCart(true);
+        const res = await addCartItemApi({ slug, quantity });
+
+        if (res?.message) {
+            notification.error({
+                message: 'Thêm vào giỏ hàng',
+                description: res.message,
+            });
+        } else {
+            notification.success({
+                message: 'Đã thêm vào giỏ hàng',
+                description: `${product.name} x${quantity}`,
+            });
+        }
+
+        setAddingToCart(false);
+    };
 
     if (loading) {
         return (
@@ -152,6 +185,21 @@ const ProductDetailPage = () => {
 
                     <div className="product-detail__stock-note">
                         {isOutOfStock ? 'Out of stock' : `${product.stock} items left in stock`}
+                    </div>
+
+                    <div className="product-detail__actions">
+                        <Button
+                            type="primary"
+                            size="large"
+                            onClick={handleAddToCart}
+                            disabled={isOutOfStock || addingToCart}
+                            block
+                        >
+                            Thêm vào giỏ hàng
+                        </Button>
+                        <Button size="large" onClick={() => navigate('/cart')} block>
+                            Xem giỏ hàng
+                        </Button>
                     </div>
 
                 </div>

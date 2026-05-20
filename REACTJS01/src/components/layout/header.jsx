@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Avatar, Button, Dropdown, Input, Space, Tag } from 'antd';
-import { AppstoreOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, SearchOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, HomeOutlined, LoginOutlined, LogoutOutlined, SearchOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/auth.context';
 
@@ -32,6 +32,7 @@ const Header = () => {
         setAuth({
             isAuthenticated: false,
             user: {
+                id: '',
                 email: '',
                 name: '',
                 role: 'Member',
@@ -98,12 +99,6 @@ const Header = () => {
                 <NavLink to="/products" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                     Products
                 </NavLink>
-                <NavLink to="/products?featured=true" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
-                    Categories
-                </NavLink>
-                <NavLink to="/products?onSale=true" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
-                    Deals
-                </NavLink>
                 <NavLink to="/posts" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                     Posts
                 </NavLink>
@@ -127,6 +122,7 @@ const Header = () => {
             <div className="store-header__account">
                 {auth.isAuthenticated ? (
                     <Space size={10}>
+                        <Button type="text" icon={<ShoppingCartOutlined />} onClick={() => navigate('/cart')} />
                         <Avatar className="store-avatar">{avatarLetter}</Avatar>
                         <Dropdown menu={{ items: menuItems }} placement="bottomRight" trigger={['click']}>
                             <Button type="text">

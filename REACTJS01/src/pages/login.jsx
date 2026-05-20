@@ -26,6 +26,7 @@ const LoginPage = () => {
             setAuth({
                 isAuthenticated: true,
                 user: {
+                    id: res?.user?.id ?? '',
                     email: res?.user?.email ?? '',
                     name: res?.user?.name ?? '',
                     role: res?.user?.role ?? 'Member',
@@ -44,6 +45,7 @@ const LoginPage = () => {
     return (
         <AuthLayout
             title="Login"
+            description="Sign in to your account"
             footer={(
                 <Space direction="vertical" size={10} className="auth-card__footer-block">
                     <div className="auth-card__links auth-card__links--single">
@@ -58,10 +60,6 @@ const LoginPage = () => {
                 </Space>
             )}
         >
-            <div className="auth-card__head">
-                <h2 className="auth-card__title">Sign in to your account</h2>
-            </div>
-
             <Form form={form} name="login-form" onFinish={onFinish} autoComplete="off" layout="vertical" size="large">
                 <Form.Item
                     label="Email"

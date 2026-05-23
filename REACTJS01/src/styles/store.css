@@ -3030,3 +3030,80 @@ a {
   }
 }
 
+/* Fix Admin layout sidebar structure */
+.admin-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.admin-menu {
+  flex: 1 1 auto;
+}
+
+/* Premium image container & sizing in CRUD tables */
+.admin-table-image-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--store-border);
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.admin-table-image-container--wide {
+  width: 80px;
+  aspect-ratio: 16/9;
+  height: auto;
+}
+
+.admin-table-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.admin-table-image-container:hover .admin-table-image {
+  transform: scale(1.12);
+}
+
+.admin-table-image-container:hover {
+  border-color: var(--store-primary);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.12);
+}
+
+/* Premium Ghost CRUD buttons */
+.admin-table .ant-btn-primary.ant-btn-background-ghost {
+  color: var(--store-primary);
+  border-color: rgba(37, 99, 235, 0.3) !important;
+  background: rgba(37, 99, 235, 0.04) !important;
+  transition: all 0.2s ease;
+}
+
+.admin-table .ant-btn-primary.ant-btn-background-ghost:hover {
+  color: #1d4ed8 !important;
+  border-color: var(--store-primary) !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.08);
+}
+
+.admin-table .ant-btn-dangerous.ant-btn-background-ghost {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+  transition: all 0.2s ease;
+}
+
+.admin-table .ant-btn-dangerous.ant-btn-background-ghost:hover {
+  color: #dc2626 !important;
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.08);
+}
+

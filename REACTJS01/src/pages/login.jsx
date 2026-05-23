@@ -38,7 +38,11 @@ const LoginPage = () => {
                 },
             });
 
-            navigate('/');
+            if (String(res?.user?.role || '').toLowerCase() === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         } else {
             notification.error({
                 message: 'Đăng nhập thất bại',

@@ -9,10 +9,12 @@ import {
     ReloadOutlined,
     ShoppingOutlined,
     TeamOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 
 const adminMenuItems = [
     { key: 'overview', icon: <DashboardOutlined />, label: 'Overview' },
+    { key: 'profile', icon: <UserOutlined />, label: 'My Profile' },
     { key: 'users', icon: <TeamOutlined />, label: 'Users' },
     { key: 'categories', icon: <AppstoreOutlined />, label: 'Categories' },
     { key: 'promotions', icon: <BarChartOutlined />, label: 'Promotions' },

@@ -9,6 +9,7 @@ import PromotionsAdmin from '../components/admin/promotions-admin';
 import ProductsAdmin from '../components/admin/products-admin';
 import OrdersAdmin from '../components/admin/orders-admin';
 import PostsAdmin from '../components/admin/posts-admin';
+import ProfilePage from './profile';
 import { getCategoriesApi, getOrdersApi, getPostsApi, getProductsApi, getPromotionsApi, getUserApi, logoutApi } from '../util/api';
 import { normalizeCollection } from '../components/admin/admin-utils';
 
@@ -16,6 +17,10 @@ const sectionMeta = {
     overview: {
         label: 'Overview',
         description: 'Quickly review ExpressJS backend data and open each CRUD section by content group.',
+    },
+    profile: {
+        label: 'Thông tin cá nhân',
+        description: 'Xem thông tin hồ sơ của bạn và quản lý danh sách địa chỉ nhận hàng.',
     },
     users: {
         label: 'Users',
@@ -44,6 +49,7 @@ const sectionMeta = {
 };
 
 const sectionComponents = {
+    profile: <ProfilePage isInsideAdmin={true} />,
     users: <UsersAdmin />,
     categories: <CategoriesAdmin />,
     promotions: <PromotionsAdmin />,

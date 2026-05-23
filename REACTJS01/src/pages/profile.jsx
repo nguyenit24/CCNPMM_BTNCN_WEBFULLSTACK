@@ -1,11 +1,11 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { Button, Card, Checkbox, Col, Divider, Empty, Form, Input, Modal, Popconfirm, Row, Space, Tag, notification } from 'antd';
-import { CheckOutlined, DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined, ShoppingOutlined, UserOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CheckOutlined, DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined, ShoppingOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../components/context/auth.context';
 import { addAccountAddressApi, deleteAccountAddressApi, getAccountApi, updateAccountAddressApi } from '../util/api';
 
-const ProfilePage = () => {
+const ProfilePage = ({ isInsideAdmin = false }) => {
     const navigate = useNavigate();
     const { auth, setAuth } = useContext(AuthContext);
     const [account, setAccount] = useState(auth?.user || null);
@@ -133,22 +133,24 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className="store-layout">
+        <div className={isInsideAdmin ? "admin-section-shell" : "store-layout"}>
             {/* Page Header */}
-            <div className="store-page-head">
-                <div>
-                    <div className="store-page-head__eyebrow">
-                        <UserOutlined /> Tài khoản của tôi
+            {!isInsideAdmin && (
+                <div className="store-page-head">
+                    <div>
+                        <div className="store-page-head__eyebrow">
+                            <UserOutlined /> Tài khoản của tôi
+                        </div>
+                        <h1 className="store-page-head__title">Thông tin cá nhân</h1>
                     </div>
-                    <h1 className="store-page-head__title">Thông tin cá nhân</h1>
+                    <div className="store-page-head__summary">
+                        <Tag color="blue">{addresses.length} địa chỉ</Tag>
+                        <Tag color={defaultAddress ? 'green' : 'orange'}>
+                            {defaultAddress ? 'Đã có địa chỉ mặc định' : 'Chưa có địa chỉ mặc định'}
+                        </Tag>
+                    </div>
                 </div>
-                <div className="store-page-head__summary">
-                    <Tag color="blue">{addresses.length} địa chỉ</Tag>
-                    <Tag color={defaultAddress ? 'green' : 'orange'}>
-                        {defaultAddress ? 'Đã có địa chỉ mặc định' : 'Chưa có địa chỉ mặc định'}
-                    </Tag>
-                </div>
-            </div>
+            )}
 
             <Row gutter={[20, 20]}>
                 {/* Account Info Card */}
@@ -196,14 +198,25 @@ const ProfilePage = () => {
                         <Divider style={{ margin: '20px 0' }} />
 
                         <Space direction="vertical" style={{ width: '100%' }}>
-                            <Button type="primary" icon={<ShoppingOutlined />} block onClick={() => navigate('/orders')}
-                                style={{ borderRadius: 999, fontWeight: 700, background: 'linear-gradient(135deg, var(--store-primary), #7c3aed)', border: 0 }}>
-                                Xem đơn hàng
-                            </Button>
-                            <Button icon={<HomeOutlined />} block onClick={() => navigate('/checkout')}
-                                style={{ borderRadius: 999 }}>
-                                Đi tới thanh toán
-                            </Button>
+                            {String(auth?.user?.role || '').toLowerCase() !== 'admin' ? (
+                                <>
+                                    <Button type="primary" icon={<ShoppingOutlined />} block onClick={() => navigate('/orders')}
+                                        style={{ borderRadius: 999, fontWeight: 700, background: 'linear-gradient(135deg, var(--store-primary), #7c3aed)', border: 0 }}>
+                                        Xem đơn hàng
+                                    </Button>
+                                    <Button icon={<HomeOutlined />} block onClick={() => navigate('/checkout')}
+                                        style={{ borderRadius: 999 }}>
+                                        Đi tới thanh toán
+                                    </Button>
+                                </>
+                            ) : (
+                                !isInsideAdmin && (
+                                    <Button type="primary" icon={<ArrowLeftOutlined />} block onClick={() => navigate('/admin')}
+                                        style={{ borderRadius: 999, fontWeight: 700, background: 'linear-gradient(135deg, var(--store-primary), #7c3aed)', border: 0 }}>
+                                        Quay lại trang Admin
+                                    </Button>
+                                )
+                            )}
                         </Space>
                     </Card>
                 </Col>

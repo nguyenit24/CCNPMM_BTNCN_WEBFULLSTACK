@@ -65,7 +65,7 @@ const Header = () => {
             ];
         }
 
-        return [
+        const items = [
             {
                 key: 'profile',
                 label: (
@@ -76,20 +76,28 @@ const Header = () => {
                 ),
             },
             { type: 'divider' },
-            {
-                key: 'orders',
-                label: <Link to="/orders">Đơn hàng của tôi</Link>,
-            },
-            { type: 'divider' },
-            {
-                key: 'logout',
-                label: (
-                    <span onClick={handleLogout}>
-                        <LogoutOutlined /> Logout
-                    </span>
-                ),
-            },
         ];
+
+        if (String(auth?.user?.role || '').toLowerCase() !== 'admin') {
+            items.push(
+                {
+                    key: 'orders',
+                    label: <Link to="/orders">Đơn hàng của tôi</Link>,
+                },
+                { type: 'divider' }
+            );
+        }
+
+        items.push({
+            key: 'logout',
+            label: (
+                <span onClick={handleLogout}>
+                    <LogoutOutlined /> Logout
+                </span>
+            ),
+        });
+
+        return items;
     }, [auth]);
 
     const avatarLetter = (auth?.user?.name || 'M').trim().charAt(0).toUpperCase();
@@ -115,7 +123,7 @@ const Header = () => {
                 <NavLink to="/posts" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                     Posts
                 </NavLink>
-                {auth.isAuthenticated ? (
+                {auth.isAuthenticated && String(auth?.user?.role || '').toLowerCase() !== 'admin' ? (
                     <NavLink to="/orders" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                         Đơn hàng
                     </NavLink>

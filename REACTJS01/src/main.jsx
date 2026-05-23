@@ -78,15 +78,15 @@ const router = createBrowserRouter(
                         </ProtectedRoute>
                     )}
                 />
-                <Route
-                    path="admin"
-                    element={(
-                        <RoleRoute roles={["Admin"]}>
-                            <AdminPage />
-                        </RoleRoute>
-                    )}
-                />
             </Route>
+            <Route
+                path="/admin"
+                element={(
+                    <RoleRoute roles={["Admin"]}>
+                        <AdminPage />
+                    </RoleRoute>
+                )}
+            />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />

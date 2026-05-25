@@ -1,6 +1,7 @@
 const express = require('express');
 const {
     createUser,
+    createAdminUser,
     handleLogin,
     getUser,
     getAccount,
@@ -9,6 +10,7 @@ const {
     deleteAccountAddress,
     getUserDetail,
     updateUser,
+    updateAccountProfile,
     deleteUser,
     handleRefreshToken,
     handleLogout,
@@ -109,6 +111,7 @@ routerAPI.get("/products/:slug", getProductDetail);
 routerAPI.use(authenticate);
 
 routerAPI.get("/account", delay, getAccount);
+routerAPI.put("/account/profile", updateAccountProfile);
 routerAPI.post("/auth/logout", handleLogout);
 routerAPI.post("/account/addresses", addAccountAddress);
 routerAPI.put("/account/addresses/:addressId", updateAccountAddress);
@@ -123,9 +126,10 @@ routerAPI.get("/orders", getOrders);
 routerAPI.get("/orders/:id", getOrderDetail);
 routerAPI.post("/orders/checkout", checkoutOrder);
 routerAPI.post("/orders/:id/cancel", cancelOrder);
-routerAPI.patch("/orders/:id/status", authorizeRoles('Admin'), updateOrderStatus);
+routerAPI.patch("/orders/:id/status", authorizeRoles('Admin', 'Staff'), updateOrderStatus);
 
 routerAPI.get("/user", authorizeRoles('Admin'), getUser);
+routerAPI.post("/user", authorizeRoles('Admin'), createAdminUser);
 routerAPI.get("/user/:id", authorizeRoles('Admin'), getUserDetail);
 routerAPI.put("/user/:id", authorizeRoles('Admin'), updateUser);
 routerAPI.delete("/user/:id", authorizeRoles('Admin'), deleteUser);

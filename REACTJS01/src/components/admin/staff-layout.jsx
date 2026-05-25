@@ -1,29 +1,19 @@
 import { useMemo } from 'react';
 import { Avatar, Button, Card, Layout, Menu, Space, Tag } from 'antd';
 import {
-    AppstoreOutlined,
-    BarChartOutlined,
     CarryOutOutlined,
-    FileTextOutlined,
     DashboardOutlined,
     ReloadOutlined,
-    ShoppingOutlined,
-    TeamOutlined,
     UserOutlined,
 } from '@ant-design/icons';
 
-const adminMenuItems = [
+const staffMenuItems = [
     { key: 'overview', icon: <DashboardOutlined />, label: 'Overview' },
     { key: 'profile', icon: <UserOutlined />, label: 'My Profile' },
-    { key: 'users', icon: <TeamOutlined />, label: 'Users' },
-    { key: 'categories', icon: <AppstoreOutlined />, label: 'Categories' },
-    { key: 'promotions', icon: <BarChartOutlined />, label: 'Promotions' },
-    { key: 'products', icon: <ShoppingOutlined />, label: 'Products' },
     { key: 'orders', icon: <CarryOutOutlined />, label: 'Orders' },
-    { key: 'posts', icon: <FileTextOutlined />, label: 'Posts' },
 ];
 
-const AdminLayout = ({
+const StaffLayout = ({
     auth,
     activeSection,
     onSectionChange,
@@ -43,7 +33,7 @@ const AdminLayout = ({
                     <div className="admin-brand__mark">T</div>
                     <div className="admin-brand__text">
                         <span className="admin-brand__title">TechStudio</span>
-                        <span className="admin-brand__subtitle">Admin Console</span>
+                        <span className="admin-brand__subtitle">Staff Console</span>
                     </div>
                 </div>
 
@@ -53,9 +43,9 @@ const AdminLayout = ({
                             {avatarLetter}
                         </Avatar>
                         <div className="admin-user-card__meta">
-                            <strong>{auth?.user?.name || 'Admin'}</strong>
-                            <span>{auth?.user?.email || 'admin@techstudio.local'}</span>
-                            <Tag color="red">Administrator</Tag>
+                            <strong>{auth?.user?.name || 'Staff'}</strong>
+                            <span>{auth?.user?.email || 'staff@techstudio.local'}</span>
+                            <Tag color="orange">Staff member</Tag>
                         </div>
                     </Space>
                 </Card>
@@ -68,14 +58,14 @@ const AdminLayout = ({
                     className="admin-menu"
                     mode="inline"
                     selectedKeys={[activeSection]}
-                    items={adminMenuItems}
+                    items={staffMenuItems}
                     onClick={({ key }) => onSectionChange(key)}
                 />
 
                 <div className="admin-sider__footer">
                     <div className="admin-sider__footer-meta">
                         <span>Signed in</span>
-                        <strong>{auth?.user?.role || 'Admin'}</strong>
+                        <strong>{auth?.user?.role || 'Staff'}</strong>
                     </div>
                     <Button danger block onClick={onLogout} className="admin-sider__logout">
                         Logout
@@ -86,7 +76,7 @@ const AdminLayout = ({
             <Layout className="admin-main">
                 <div className="admin-topbar">
                     <div>
-                        <p className="admin-topbar__eyebrow">Admin Dashboard</p>
+                        <p className="admin-topbar__eyebrow">Staff Dashboard</p>
                         <h1 className="admin-topbar__title">{title}</h1>
                         <p className="admin-topbar__subtitle">{description}</p>
                     </div>
@@ -107,5 +97,5 @@ const AdminLayout = ({
     );
 };
 
-export { adminMenuItems };
-export default AdminLayout;
+export { staffMenuItems };
+export default StaffLayout;

@@ -102,6 +102,7 @@ const Header = () => {
 
     const avatarLetter = (auth?.user?.name || 'M').trim().charAt(0).toUpperCase();
     const showAdminLink = auth.isAuthenticated && String(auth?.user?.role || '').toLowerCase() === 'admin';
+    const showStaffLink = auth.isAuthenticated && String(auth?.user?.role || '').toLowerCase() === 'staff';
 
     return (
         <header className="store-header">
@@ -131,6 +132,11 @@ const Header = () => {
                 {showAdminLink ? (
                     <NavLink to="/admin" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
                         Admin
+                    </NavLink>
+                ) : null}
+                {showStaffLink ? (
+                    <NavLink to="/staff" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
+                        Staff
                     </NavLink>
                 ) : null}
             </nav>

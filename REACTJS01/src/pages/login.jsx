@@ -1,98 +1,141 @@
-import React, { useContext } from 'react';
-import { Button, Form, Input, notification, Space } from 'antd';
+import React, { useContext, useState } from 'react';
+import { Form, Button, Spinner } from 'react-bootstrap';
 import { loginApi } from '../util/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../components/context/auth.context';
-import { ArrowLeftOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
-import AuthLayout from '../components/auth/auth-layout';
+import { notification } from 'antd';
+import BootstrapAuthLayout from '../components/auth/bootstrap-auth-layout';
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const { setAuth } = useContext(AuthContext);
-    const [form] = Form.useForm();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [validated, setValidated] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const onFinish = async (values) => {
-        const { email, password } = values;
-        const res = await loginApi(email, password);
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        
+        if (form.checkValidity() === false) {
+            event.stopPropagation();
+            setValidated(true);
+            return;
+        }
 
-        if (res && res.EC === 0) {
-            localStorage.setItem('access_token', res.access_token);
-            if (res.refresh_token) {
-                localStorage.setItem('refresh_token', res.refresh_token);
-            }
+        setValidated(true);
+        setLoading(true);
 
-            notification.success({
-                message: 'Đăng nhập thành công',
-                description: 'Chào mừng bạn quay trở lại với TechStudio',
-            });
+        try {
+            const res = await loginApi(email, password);
 
-            setAuth({
-                isAuthenticated: true,
-                user: {
-                    id: res?.user?.id ?? res?.user?._id ?? '',
-                    email: res?.user?.email ?? '',
-                    name: res?.user?.name ?? '',
-                    role: res?.user?.role ?? 'Member',
-                    addresses: Array.isArray(res?.user?.addresses) ? res.user.addresses : [],
-                    defaultAddress: res?.user?.defaultAddress || null,
-                },
-            });
+            if (res && res.EC === 0) {
+                localStorage.setItem('access_token', res.access_token);
+                if (res.refresh_token) {
+                    localStorage.setItem('refresh_token', res.refresh_token);
+                }
 
-            if (String(res?.user?.role || '').toLowerCase() === 'admin') {
-                navigate('/admin');
+                notification.success({
+                    message: 'Đăng nhập thành công',
+                    description: 'Chào mừng bạn quay trở lại với TechStudio',
+                });
+
+                setAuth({
+                    isAuthenticated: true,
+                    user: {
+                        id: res?.user?.id ?? res?.user?._id ?? '',
+                        email: res?.user?.email ?? '',
+                        name: res?.user?.name ?? '',
+                        role: res?.user?.role ?? 'Member',
+                        addresses: Array.isArray(res?.user?.addresses) ? res.user.addresses : [],
+                        defaultAddress: res?.user?.defaultAddress || null,
+                    },
+                });
+
+                const role = String(res?.user?.role || '').toLowerCase();
+                if (role === 'admin') {
+                    navigate('/admin');
+                } else if (role === 'staff') {
+                    navigate('/staff');
+                } else {
+                    navigate('/');
+                }
             } else {
-                navigate('/');
+                notification.error({
+                    message: 'Đăng nhập thất bại',
+                    description: res?.EM ?? 'Email hoặc mật khẩu không chính xác!',
+                });
             }
-        } else {
+        } catch (error) {
             notification.error({
                 message: 'Đăng nhập thất bại',
-                description: res?.EM ?? 'Email hoặc mật khẩu không chính xác!',
+                description: 'Đã xảy ra lỗi kết nối máy chủ.',
             });
+        } finally {
+            setLoading(false);
         }
     };
 
+    const footer = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div className="bootstrap-auth-links">
+                <Link to="/">
+                    ← Quay lại trang chủ
+                </Link>
+                <Link to="/forgot-password">Quên mật khẩu?</Link>
+            </div>
+            <div className="text-center mt-3 text-muted" style={{ fontSize: '0.85rem' }}>
+                Chưa có tài khoản? <Link to="/register" style={{ color: '#3b82f6', fontWeight: 600 }}>Đăng ký ngay</Link>
+            </div>
+        </div>
+    );
+
     return (
-        <AuthLayout
+        <BootstrapAuthLayout
             title="Đăng nhập"
             description="Đăng nhập tài khoản để mua sắm công nghệ đỉnh cao"
-            footer={(
-                <Space direction="vertical" size={10} className="auth-card__footer-block">
-                    <div className="auth-card__links auth-card__links--single">
-                        <Link to="/">
-                            <ArrowLeftOutlined /> Quay lại trang chủ
-                        </Link>
-                        <Link to="/forgot-password">Quên mật khẩu?</Link>
-                    </div>
-                    <div className="auth-card__footer" style={{ textAlign: 'center' }}>
-                        Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
-                    </div>
-                </Space>
-            )}
+            footer={footer}
         >
-            <Form form={form} name="login-form" onFinish={onFinish} autoComplete="off" layout="vertical" size="large">
-                <Form.Item
-                    label="Email"
-                    name="email"
-                    rules={[{ required: true, message: 'Vui lòng nhập email của bạn!' }]}
-                >
-                    <Input prefix={<MailOutlined />} placeholder="your@email.com" />
-                </Form.Item>
+            <Form noValidate validated={validated} onSubmit={handleSubmit} className="bootstrap-auth-form">
+                <Form.Group className="mb-3" controlId="loginEmail">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                        required
+                        type="email"
+                        placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        Vui lòng nhập địa chỉ email hợp lệ!
+                    </Form.Control.Feedback>
+                </Form.Group>
 
-                <Form.Item
-                    label="Mật khẩu"
-                    name="password"
-                    rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-                >
-                    <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu" />
-                </Form.Item>
+                <Form.Group className="mb-4" controlId="loginPassword">
+                    <Form.Label>Mật khẩu</Form.Label>
+                    <Form.Control
+                        required
+                        type="password"
+                        placeholder="Nhập mật khẩu"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                        Vui lòng nhập mật khẩu!
+                    </Form.Control.Feedback>
+                </Form.Group>
 
-                <Form.Item className="auth-form__submit">
-                    <Button type="primary" htmlType="submit" block className="auth-gradient-btn">
-                        Đăng nhập
-                    </Button>
-                </Form.Item>
+                <Button type="submit" className="bootstrap-auth-btn w-100" disabled={loading}>
+                    {loading ? (
+                        <>
+                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                            Đang xử lý...
+                        </>
+                    ) : 'Đăng nhập'}
+                </Button>
             </Form>
-        </AuthLayout>
+        </BootstrapAuthLayout>
     );
 };
 

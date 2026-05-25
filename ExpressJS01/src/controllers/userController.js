@@ -1,5 +1,6 @@
 const {
     createUserService,
+    createAdminUserService,
     loginService,
     getUserService,
     getUserDetailService,
@@ -8,6 +9,7 @@ const {
     updateAddressService,
     deleteAddressService,
     updateUserService,
+    updateAccountProfileService,
     deleteUserService,
     handleRefreshTokenService,
     logoutService,
@@ -17,6 +19,23 @@ const createUser = async (req, res) => {
     const { name, email, password } = req.body;
     const data = await createUserService(name, email, password);
     return res.status(200).json(data)
+}
+
+const createAdminUser = async (req, res) => {
+    try {
+        const { name, email, password, role } = req.body;
+        if (!name || !email || !password || !role) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ thông tin name, email, password, role' });
+        }
+        const data = await createAdminUserService(name, email, password, role);
+        if (!data) {
+            return res.status(409).json({ message: 'Email đã tồn tại' });
+        }
+        return res.status(201).json(data);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Đã xảy ra lỗi máy chủ' });
+    }
 }
 
 const handleLogin = async (req, res) => {
@@ -131,6 +150,17 @@ const handleRefreshToken = async (req, res) => {
     }
 }
 
+const updateAccountProfile = async (req, res) => {
+    try {
+        const data = await updateAccountProfileService(req.user.id, req.body);
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error);
+        const status = error.status || 500;
+        return res.status(status).json({ message: error.message || 'Đã xảy ra lỗi máy chủ' });
+    }
+}
+
 const handleLogout = async (req, res) => {
     try {
         if (req.user?.id) {
@@ -145,6 +175,7 @@ const handleLogout = async (req, res) => {
 
 module.exports = {
     createUser,
+    createAdminUser,
     handleLogin,
     getUser,
     getAccount,
@@ -153,6 +184,7 @@ module.exports = {
     deleteAccountAddress,
     getUserDetail,
     updateUser,
+    updateAccountProfile,
     deleteUser,
     handleRefreshToken,
     handleLogout,

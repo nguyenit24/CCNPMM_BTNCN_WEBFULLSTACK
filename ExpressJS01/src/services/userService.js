@@ -169,6 +169,30 @@ const createUserService = async (name, email, password) => {
     }
 }
 
+const createAdminUserService = async (name, email, password, role) => {
+    try {
+        const user = await User.findOne({ email });
+        if (user) {
+            console.log(`>>> user exist, chọn 1 email khác: ${email}`);
+            return null;
+        }
+
+        const hashPassword = await bcrypt.hash(password, saltRounds);
+        let result = await User.create({
+            name: name,
+            email: email,
+            password: hashPassword,
+            role: role || "Member",
+            addresses: []
+        });
+        return serializeUser(result);
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+};
+
+
 const loginService = async (email, password) => {
     try {
         const user = await User.findOne({ email: email });
@@ -190,14 +214,14 @@ const loginService = async (email, password) => {
                     payload,
                     process.env.JWT_SECRET,
                     {
-                        expiresIn: process.env.JWT_EXPIRE
+                        expiresIn: process.env.JWT_ACCESS_EXPIRE || process.env.JWT_EXPIRE || '1h'
                     }
                 )
                 const refresh_token = jwt.sign(
                     { id: user._id.toString() },
                     process.env.JWT_SECRET,
                     {
-                        expiresIn: '30d'
+                        expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d'
                     }
                 )
                 user.refreshToken = refresh_token;
@@ -383,6 +407,79 @@ const updateUserService = async (id, payload = {}) => {
     return serializeUser(result);
 };
 
+const updateAccountProfileService = async (userId, payload = {}) => {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw createError(404, "User not found");
+    }
+
+    if (payload.name !== undefined) {
+        const name = String(payload.name || '').trim();
+        if (!name) {
+            throw createError(400, "Tên không được để trống");
+        }
+        user.name = name;
+    }
+
+    if (payload.email !== undefined) {
+        const email = String(payload.email || '').trim();
+        if (!email) {
+            throw createError(400, "Email không được để trống");
+        }
+        if (email !== user.email) {
+            const exists = await User.findOne({ email });
+            if (exists) {
+                throw createError(409, "Email đã tồn tại");
+            }
+            user.email = email;
+        }
+    }
+
+    if (payload.address !== undefined) {
+        const addrPayload = payload.address || {};
+        const line1 = String(addrPayload.line1 || '').trim();
+        const ward = String(addrPayload.ward || '').trim();
+        const district = String(addrPayload.district || '').trim();
+        const province = String(addrPayload.province || '').trim();
+        const country = String(addrPayload.country || 'Việt Nam').trim();
+        const detail = String(addrPayload.detail || '').trim();
+        const googleMapsLink = String(addrPayload.googleMapsLink || '').trim();
+
+        let defaultAddr = user.addresses.find(a => a.isDefault);
+        if (!defaultAddr && user.addresses.length > 0) {
+            defaultAddr = user.addresses[0];
+        }
+
+        if (defaultAddr) {
+            defaultAddr.line1 = line1;
+            defaultAddr.ward = ward;
+            defaultAddr.district = district;
+            defaultAddr.province = province;
+            defaultAddr.country = country;
+            defaultAddr.detail = detail;
+            defaultAddr.googleMapsLink = googleMapsLink;
+            defaultAddr.isDefault = true;
+        } else {
+            user.addresses.push({
+                label: 'Địa chỉ mặc định',
+                recipientName: user.name,
+                phone: '---',
+                line1,
+                ward,
+                district,
+                province,
+                country,
+                detail,
+                googleMapsLink,
+                isDefault: true
+            });
+        }
+    }
+
+    await user.save();
+    return serializeUser(user);
+};
+
 const deleteUserService = async (id) => {
     const user = await User.findByIdAndDelete(id).select("-password");
     return user;
@@ -407,13 +504,13 @@ const handleRefreshTokenService = async (refreshToken) => {
         const access_token = jwt.sign(
             payload,
             process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRE || '1h' }
+            { expiresIn: process.env.JWT_ACCESS_EXPIRE || process.env.JWT_EXPIRE || '1h' }
         );
 
         const new_refresh_token = jwt.sign(
             { id: user._id.toString() },
             process.env.JWT_SECRET,
-            { expiresIn: '30d' }
+            { expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d' }
         );
 
         user.refreshToken = new_refresh_token;
@@ -447,6 +544,7 @@ const logoutService = async (userId) => {
 
 module.exports = {
     createUserService,
+    createAdminUserService,
     loginService,
     getUserService,
     getUserDetailService,
@@ -455,6 +553,7 @@ module.exports = {
     updateAddressService,
     deleteAddressService,
     updateUserService,
+    updateAccountProfileService,
     deleteUserService,
     handleRefreshTokenService,
     logoutService,

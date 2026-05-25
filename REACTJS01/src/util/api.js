@@ -57,6 +57,17 @@ const getUserApi = () => {
     return axios.get(URL_API)
 }
 
+const createAdminUserApi = (name, email, password, role) => {
+
+    const URL_API = "/v1/api/user";
+
+    const data = {
+        name, email, password, role
+    }
+
+    return axios.post(URL_API, data)
+}
+
 const getUserDetailApi = (id) => {
 
     const URL_API = `/v1/api/user/${id}`;
@@ -83,6 +94,11 @@ const getAccountApi = () => {
     const URL_API = "/v1/api/account";
 
     return axios.get(URL_API)
+}
+
+const updateAccountProfileApi = (data = {}) => {
+    const URL_API = "/v1/api/account/profile";
+    return axios.put(URL_API, data);
 }
 
 const getHomeApi = () => {
@@ -348,10 +364,12 @@ export {
     resetPasswordWithOtpApi,
     loginApi,
     getUserApi,
+    createAdminUserApi,
     getUserDetailApi,
     updateUserApi,
     deleteUserApi,
     getAccountApi,
+    updateAccountProfileApi,
     getHomeApi,
     getCategoriesApi,
     getCategoryDetailApi,

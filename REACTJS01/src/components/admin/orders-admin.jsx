@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Table, Tag, Steps, notification, Alert, Divider, Tooltip } from 'antd';
 import { EyeOutlined, CheckCircleOutlined, CloseCircleOutlined, UserOutlined, HomeOutlined, CreditCardOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
 import AdminCard from './admin-card';
-import { getOrdersApi, updateOrderStatusApi } from '../../util/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchOrders, updateOrderStatus } from '../../redux/slices/orderSlice';
 
 const ORDER_STATUS_OPTIONS = [
     { value: 'new', label: 'Đơn hàng mới (Chờ duyệt)' },
@@ -35,23 +36,17 @@ const STATUS_STEPS = ['new', 'confirmed', 'preparing', 'shipped', 'delivered'];
 
 const OrdersAdmin = () => {
     const [form] = Form.useForm();
-    const [items, setItems] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
+    const { items, loading } = useSelector((state) => state.orders);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingOrder, setEditingOrder] = useState(null);
 
     const loadOrders = async () => {
-        setLoading(true);
-        const res = await getOrdersApi();
-
-        if (res?.message) {
-            notification.error({ message: 'Tải đơn hàng thất bại', description: res.message });
-            setItems([]);
-        } else {
-            setItems(Array.isArray(res) ? res : []);
+        try {
+            await dispatch(fetchOrders()).unwrap();
+        } catch (err) {
+            notification.error({ message: 'Tải đơn hàng thất bại', description: err });
         }
-
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -72,20 +67,18 @@ const OrdersAdmin = () => {
             return;
         }
 
-        const res = await updateOrderStatusApi(editingOrder.id, values);
-        if (res?.message) {
-            notification.error({ message: 'Cập nhật đơn hàng thất bại', description: res.message });
-            return;
+        try {
+            await dispatch(updateOrderStatus({ id: editingOrder.id, status: values.status, note: values.note })).unwrap();
+            notification.success({ 
+                message: 'Cập nhật đơn hàng', 
+                description: `Đơn hàng ${editingOrder.orderCode} đã chuyển sang trạng thái "${ORDER_STATUS_LABELS[values.status]}".` 
+            });
+            setModalOpen(false);
+            setEditingOrder(null);
+            form.resetFields();
+        } catch (err) {
+            notification.error({ message: 'Cập nhật đơn hàng thất bại', description: err });
         }
-
-        notification.success({ 
-            message: 'Cập nhật đơn hàng', 
-            description: `Đơn hàng ${editingOrder.orderCode} đã chuyển sang trạng thái "${ORDER_STATUS_LABELS[values.status]}".` 
-        });
-        setModalOpen(false);
-        setEditingOrder(null);
-        form.resetFields();
-        loadOrders();
     };
 
     const handleQuickCancelAction = async (approve) => {
@@ -93,22 +86,20 @@ const OrdersAdmin = () => {
         
         const payload = approve 
             ? { status: 'cancelled', note: 'Chấp nhận yêu cầu hủy đơn từ khách hàng.' }
-            : { status: 'confirmed', note: 'Từ chối yêu cầu hủy đơn, tiếp tục xử lý.' }; // or reset status
+            : { status: 'confirmed', note: 'Từ chối yêu cầu hủy đơn, tiếp tục xử lý.' };
 
-        const res = await updateOrderStatusApi(editingOrder.id, payload);
-        if (res?.message) {
-            notification.error({ message: 'Thao tác thất bại', description: res.message });
-            return;
+        try {
+            await dispatch(updateOrderStatus({ id: editingOrder.id, status: payload.status, note: payload.note })).unwrap();
+            notification.success({
+                message: 'Xử lý yêu cầu hủy đơn',
+                description: approve ? 'Đã chấp nhận và hủy đơn hàng.' : 'Đã bác bỏ yêu cầu hủy đơn hàng.',
+            });
+            setModalOpen(false);
+            setEditingOrder(null);
+            form.resetFields();
+        } catch (err) {
+            notification.error({ message: 'Thao tác thất bại', description: err });
         }
-
-        notification.success({
-            message: 'Xử lý yêu cầu hủy đơn',
-            description: approve ? 'Đã chấp nhận và hủy đơn hàng.' : 'Đã bác bỏ yêu cầu hủy đơn hàng.',
-        });
-        setModalOpen(false);
-        setEditingOrder(null);
-        form.resetFields();
-        loadOrders();
     };
 
     // Auto-detect and format currency (VND vs USD)

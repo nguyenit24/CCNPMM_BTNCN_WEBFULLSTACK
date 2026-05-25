@@ -1,33 +1,29 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Button, Form, Input, Modal, Popconfirm, Space, Table, Tag, Select, notification, Card } from 'antd';
 import { SearchOutlined, UserOutlined, MailOutlined, KeyOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { createUserApi, deleteUserApi, getUserApi, updateUserApi } from '../../util/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUsers, createUser, updateUser, deleteUser } from '../../redux/slices/staffSlice';
 import AdminCard from './admin-card';
 
 const { Option } = Select;
 
 const UsersAdmin = () => {
     const [form] = Form.useForm();
-    const [items, setItems] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
+    const { items, loading } = useSelector((state) => state.staff);
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
 
     const loadUsers = async () => {
-        setLoading(true);
-        const res = await getUserApi();
-
-        if (res?.message) {
+        try {
+            await dispatch(fetchUsers()).unwrap();
+        } catch (err) {
             notification.error({
                 message: 'Tải danh sách người dùng thất bại',
-                description: res.message,
+                description: err,
             });
-            setItems([]);
-        } else {
-            setItems(Array.isArray(res) ? res : []);
         }
-        setLoading(false);
     };
 
     useEffect(() => {
@@ -59,44 +55,38 @@ const UsersAdmin = () => {
                 if (!payload.password) {
                     delete payload.password;
                 }
-                const res = await updateUserApi(editing._id, payload);
-                if (res?.message) {
-                    throw new Error(res.message);
-                }
+                await dispatch(updateUser({ id: editing._id || editing.id, data: payload })).unwrap();
                 notification.success({ message: 'Cập nhật tài khoản', description: 'Cập nhật thông tin thành công!' });
             } else {
                 if (!values.password) {
                     notification.error({ message: 'Tạo tài khoản', description: 'Vui lòng nhập mật khẩu' });
                     return;
                 }
-                const created = await createUserApi(values.name, values.email, values.password);
-                if (!created || created?.message) {
-                    throw new Error(created?.message || 'Không thể tạo tài khoản');
-                }
-                if (values.role) {
-                    await updateUserApi(created._id, { role: values.role });
-                }
+                await dispatch(createUser({
+                    name: values.name,
+                    email: values.email,
+                    password: values.password,
+                    role: values.role
+                })).unwrap();
                 notification.success({ message: 'Tạo tài khoản', description: 'Thêm tài khoản mới thành công!' });
             }
             setModalOpen(false);
             form.resetFields();
-            loadUsers();
         } catch (error) {
             notification.error({
                 message: editing ? 'Cập nhật tài khoản thất bại' : 'Tạo tài khoản thất bại',
-                description: error.message || 'Yêu cầu không thành công',
+                description: error || 'Yêu cầu không thành công',
             });
         }
     };
 
     const handleDelete = async (record) => {
-        const res = await deleteUserApi(record._id);
-        if (res?.message) {
-            notification.error({ message: 'Xóa tài khoản thất bại', description: res.message });
-            return;
+        try {
+            await dispatch(deleteUser(record._id || record.id)).unwrap();
+            notification.success({ message: 'Xóa tài khoản', description: 'Tài khoản đã được gỡ bỏ khỏi hệ thống!' });
+        } catch (error) {
+            notification.error({ message: 'Xóa tài khoản thất bại', description: error });
         }
-        notification.success({ message: 'Xóa tài khoản', description: 'Tài khoản đã được gỡ bỏ khỏi hệ thống!' });
-        loadUsers();
     };
 
     const filteredItems = useMemo(() => {
@@ -134,14 +124,24 @@ const UsersAdmin = () => {
             key: 'role',
             filters: [
                 { text: 'Admin', value: 'Admin' },
+                { text: 'Staff', value: 'Staff' },
                 { text: 'Member', value: 'Member' },
             ],
             onFilter: (value, record) => record.role === value,
             render: (role) => {
-                const isSysAdmin = String(role || '').toLowerCase() === 'admin';
+                const r = String(role || '').toLowerCase();
+                let tagColor = 'blue';
+                let label = 'MEMBER';
+                if (r === 'admin') {
+                    tagColor = 'red';
+                    label = 'ADMINISTRATOR';
+                } else if (r === 'staff') {
+                    tagColor = 'orange';
+                    label = 'STAFF';
+                }
                 return (
-                    <Tag color={isSysAdmin ? 'red' : 'blue'} style={{ borderRadius: 8, padding: '2px 10px', fontWeight: 700 }}>
-                        {isSysAdmin ? 'ADMINISTRATOR' : 'MEMBER'}
+                    <Tag color={tagColor} style={{ borderRadius: 8, padding: '2px 10px', fontWeight: 700 }}>
+                        {label}
                     </Tag>
                 );
             },
@@ -202,7 +202,7 @@ const UsersAdmin = () => {
 
             <Table
                 className="admin-table custom-premium-table"
-                rowKey="_id"
+                rowKey={(record) => record._id || record.id}
                 columns={columns}
                 dataSource={filteredItems}
                 loading={loading}
@@ -261,6 +261,7 @@ const UsersAdmin = () => {
                     >
                         <Select placeholder="Chọn vai trò" style={{ borderRadius: 10 }} size="large">
                             <Option value="Member">Thành viên (Member)</Option>
+                            <Option value="Staff">Nhân viên (Staff)</Option>
                             <Option value="Admin">Quản trị viên (Admin)</Option>
                         </Select>
                     </Form.Item>

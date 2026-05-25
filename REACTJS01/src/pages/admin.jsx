@@ -13,7 +13,7 @@ import ProfilePage from './profile';
 import { getCategoriesApi, getOrdersApi, getPostsApi, getProductsApi, getPromotionsApi, getUserApi, logoutApi } from '../util/api';
 import { normalizeCollection } from '../components/admin/admin-utils';
 
-const sectionMeta = {
+const adminSectionMeta = {
     overview: {
         label: 'Overview',
         description: 'Quickly review ExpressJS backend data and open each CRUD section by content group.',
@@ -48,7 +48,7 @@ const sectionMeta = {
     },
 };
 
-const sectionComponents = {
+const adminSectionComponents = {
     profile: <ProfilePage isInsideAdmin={true} />,
     users: <UsersAdmin />,
     categories: <CategoriesAdmin />,
@@ -75,23 +75,28 @@ const AdminPage = () => {
     const loadOverview = async () => {
         setOverviewLoading(true);
 
-        const [usersRes, categoriesRes, promotionsRes, productsRes, ordersRes, postsRes] = await Promise.all([
-            getUserApi().catch(() => []),
-            getCategoriesApi().catch(() => []),
-            getPromotionsApi().catch(() => []),
-            getProductsApi({ page: 1, limit: 1 }).catch(() => ({ total: 0, items: [] })),
-            getOrdersApi().catch(() => []),
-            getPostsApi({ page: 1, limit: 1 }).catch(() => ({ total: 0, items: [] })),
-        ]);
+        try {
+            const [usersRes, categoriesRes, promotionsRes, productsRes, ordersRes, postsRes] = await Promise.all([
+                getUserApi().catch(() => []),
+                getCategoriesApi().catch(() => []),
+                getPromotionsApi().catch(() => []),
+                getProductsApi({ page: 1, limit: 1 }).catch(() => ({ total: 0, items: [] })),
+                getOrdersApi().catch(() => []),
+                getPostsApi({ page: 1, limit: 1 }).catch(() => ({ total: 0, items: [] })),
+            ]);
 
-        setOverviewStats({
-            users: normalizeCollection(usersRes).length,
-            categories: normalizeCollection(categoriesRes).length,
-            promotions: normalizeCollection(promotionsRes).length,
-            products: Number(productsRes?.total ?? normalizeCollection(productsRes).length ?? 0),
-            orders: normalizeCollection(ordersRes).length,
-            posts: Number(postsRes?.total ?? normalizeCollection(postsRes).length ?? 0),
-        });
+            setOverviewStats({
+                users: normalizeCollection(usersRes).length,
+                categories: normalizeCollection(categoriesRes).length,
+                promotions: normalizeCollection(promotionsRes).length,
+                products: Number(productsRes?.total ?? normalizeCollection(productsRes).length ?? 0),
+                orders: normalizeCollection(ordersRes).length,
+                posts: Number(postsRes?.total ?? normalizeCollection(postsRes).length ?? 0),
+            });
+        } catch (error) {
+            console.error('Error loading dashboard metrics:', error);
+        }
+
         setOverviewLoading(false);
     };
 
@@ -120,8 +125,7 @@ const AdminPage = () => {
         navigate('/login');
     };
 
-    const currentSection = sectionMeta[activeSection] || sectionMeta.overview;
-
+    const currentSection = adminSectionMeta[activeSection] || adminSectionMeta.overview;
     return (
         <AdminLayout
             auth={auth}
@@ -140,7 +144,7 @@ const AdminPage = () => {
                     onOpenSection={setActiveSection}
                 />
             ) : (
-                <div className="admin-section-shell">{sectionComponents[activeSection]}</div>
+                <div className="admin-section-shell">{adminSectionComponents[activeSection]}</div>
             )}
         </AdminLayout>
     );

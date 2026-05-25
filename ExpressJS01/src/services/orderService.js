@@ -225,16 +225,18 @@ const ensurePermission = (order, actor) => {
     }
 
     const isAdmin = String(actor?.role || '').toLowerCase() === 'admin';
+    const isStaff = String(actor?.role || '').toLowerCase() === 'staff';
     const ownerId = order.userId?.toString?.() || order.userId;
 
-    if (!isAdmin && actor?.id?.toString?.() !== ownerId) {
+    if (!isAdmin && !isStaff && actor?.id?.toString?.() !== ownerId) {
         throw createError(403, 'Bạn không có quyền truy cập đơn hàng này');
     }
 };
 
 const getOrderQuery = (actor) => {
     const isAdmin = String(actor?.role || '').toLowerCase() === 'admin';
-    if (isAdmin) {
+    const isStaff = String(actor?.role || '').toLowerCase() === 'staff';
+    if (isAdmin || isStaff) {
         return {};
     }
 
@@ -488,7 +490,12 @@ const updateOrderStatusService = async (actor = {}, id, payload = {}) => {
         throw createError(404, 'Order not found');
     }
 
-    ensurePermission(order, { ...actor, role: 'Admin' });
+    const isAdmin = String(actor?.role || '').toLowerCase() === 'admin';
+    const isStaff = String(actor?.role || '').toLowerCase() === 'staff';
+    if (!isAdmin && !isStaff) {
+        throw createError(403, 'Chỉ Admin hoặc Staff mới có quyền cập nhật trạng thái đơn hàng');
+    }
+
     await syncAutoConfirmation(order);
     if (order.isModified()) {
         await order.save();

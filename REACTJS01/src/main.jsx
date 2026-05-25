@@ -1,8 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/global.css';
 import './styles/store.css';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 
 import {
     createBrowserRouter,
@@ -25,6 +28,7 @@ import PostsPage from './pages/posts.jsx';
 import OrdersPage from './pages/orders.jsx';
 import ProfilePage from './pages/profile.jsx';
 import AdminPage from './pages/admin.jsx';
+import StaffPage from './pages/staff.jsx';
 
 import { AuthWrapper } from './components/context/auth.context.jsx';
 import { ProtectedRoute, RoleRoute } from './components/context/route-guard.jsx';
@@ -87,6 +91,14 @@ const router = createBrowserRouter(
                     </RoleRoute>
                 )}
             />
+            <Route
+                path="/staff"
+                element={(
+                    <RoleRoute roles={["Staff"]}>
+                        <StaffPage />
+                    </RoleRoute>
+                )}
+            />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -96,10 +108,10 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-
-        <AuthWrapper>
-            <RouterProvider router={router} />
-        </AuthWrapper>
-
+        <Provider store={store}>
+            <AuthWrapper>
+                <RouterProvider router={router} />
+            </AuthWrapper>
+        </Provider>
     </React.StrictMode>,
 )

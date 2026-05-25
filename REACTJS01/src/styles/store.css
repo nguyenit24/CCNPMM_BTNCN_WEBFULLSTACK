@@ -1495,13 +1495,17 @@ a {
   position: sticky;
   top: 0;
   height: 100vh;
-  padding: 22px 18px;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
   border-right: 1px solid var(--store-border);
   background: rgba(255, 255, 255, 0.82) !important;
   backdrop-filter: blur(18px);
+}
+
+.admin-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 18px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .admin-brand {
@@ -1545,14 +1549,31 @@ a {
   box-shadow: var(--store-shadow);
 }
 
+.admin-user-card .ant-card-body {
+  padding: 12px 14px !important;
+}
+
 .admin-user-card__meta {
   display: grid;
   gap: 4px;
   color: var(--store-muted);
+  min-width: 0;
 }
 
 .admin-user-card__meta strong {
   color: var(--store-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.admin-user-card__meta span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+  font-size: 0.8rem;
 }
 
 .admin-user-card__avatar {
@@ -3105,5 +3126,139 @@ a {
   border-color: #ef4444 !important;
   background: rgba(239, 68, 68, 0.1) !important;
   box-shadow: 0 4px 10px rgba(239, 68, 68, 0.08);
+}
+
+/* React Bootstrap Auth styles */
+.bootstrap-auth-container {
+  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 30%),
+              radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.15), transparent 30%),
+              #0f172a !important;
+  min-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 3rem 1.5rem !important;
+}
+
+.bootstrap-auth-card {
+  background: rgba(30, 41, 59, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+  padding: 3rem 2.5rem !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  color: #f1f5f9 !important;
+}
+
+.bootstrap-auth-logo {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+  font-weight: 800 !important;
+  font-size: 1.4rem !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto 1.5rem auto !important;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+.bootstrap-auth-title {
+  font-weight: 800 !important;
+  font-size: 1.8rem !important;
+  text-align: center !important;
+  color: #ffffff !important;
+  margin-bottom: 0.5rem !important;
+  letter-spacing: -0.5px !important;
+}
+
+.bootstrap-auth-desc {
+  text-align: center !important;
+  color: #94a3b8 !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.bootstrap-auth-form .form-label {
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  color: #cbd5e1 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.bootstrap-auth-form .form-control {
+  background: rgba(15, 23, 42, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+  color: #ffffff !important;
+  padding: 0.75rem 1rem !important;
+  font-size: 0.95rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.bootstrap-auth-form .form-control:focus {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.bootstrap-auth-btn {
+  background: linear-gradient(135deg, #3b82f6, #7c3aed) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 0.75rem !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25) !important;
+  transition: all 0.2s ease !important;
+  color: #fff !important;
+}
+
+.bootstrap-auth-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #6d28d9) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35) !important;
+  color: #fff !important;
+}
+
+.bootstrap-auth-links {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-top: 1.5rem !important;
+  font-size: 0.9rem !important;
+}
+
+.bootstrap-auth-links a {
+  color: #3b82f6 !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  transition: color 0.2s ease !important;
+}
+
+.bootstrap-auth-links a:hover {
+  color: #60a5fa !important;
+}
+
+.bootstrap-auth-footer {
+  text-align: center !important;
+  margin-top: 2rem !important;
+  padding-top: 1.5rem !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94a3b8 !important;
+  font-size: 0.9rem !important;
+}
+
+.bootstrap-auth-footer a {
+  color: #3b82f6 !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
 }
 

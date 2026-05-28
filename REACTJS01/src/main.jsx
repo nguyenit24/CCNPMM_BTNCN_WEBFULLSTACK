@@ -29,6 +29,8 @@ import OrdersPage from './pages/orders.jsx';
 import ProfilePage from './pages/profile.jsx';
 import AdminPage from './pages/admin.jsx';
 import StaffPage from './pages/staff.jsx';
+import FavoritesPage from './pages/favorites.jsx';
+import RewardsPage from './pages/rewards.jsx';
 
 import { AuthWrapper } from './components/context/auth.context.jsx';
 import { ProtectedRoute, RoleRoute } from './components/context/route-guard.jsx';
@@ -82,6 +84,23 @@ const router = createBrowserRouter(
                         </ProtectedRoute>
                     )}
                 />
+                <Route
+                    path="favorites"
+                    element={(
+                        <ProtectedRoute>
+                            <FavoritesPage />
+                        </ProtectedRoute>
+                    )}
+                />
+                <Route
+                    path="rewards"
+                    element={(
+                        <ProtectedRoute>
+                            <RewardsPage />
+                        </ProtectedRoute>
+                    )}
+                />
+
             </Route>
             <Route
                 path="/admin"

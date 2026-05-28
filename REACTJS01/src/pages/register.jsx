@@ -18,7 +18,7 @@ const RegisterPage = () => {
     const [sendingOtp, setSendingOtp] = useState(false);
     const [verifyingOtp, setVerifyingOtp] = useState(false);
 
-    const stepLabel = useMemo(() => (step === 1 ? 'Bước 1: Thông tin cá nhân' : 'Bước 2: Xác minh mã OTP'), [step]);
+    const stepLabel = useMemo(() => (step === 1 ? 'Step 1: Personal Information' : 'Step 2: OTP Verification'), [step]);
 
     const handleSendOtp = async (userData) => {
         setSendingOtp(true);
@@ -29,19 +29,19 @@ const RegisterPage = () => {
                 setStep(2);
                 setValidated(false);
                 notification.success({
-                    message: 'Đã gửi mã OTP',
-                    description: 'Vui lòng kiểm tra email của bạn để nhận mã xác thực.',
+                    message: 'OTP Sent',
+                    description: 'Please check your email for the verification code.',
                 });
             } else {
                 notification.error({
-                    message: 'Không thể gửi mã OTP',
-                    description: res?.EM ?? 'Đã xảy ra lỗi khi gửi mã OTP!',
+                    message: 'Could Not Send OTP',
+                    description: res?.EM ?? 'An error occurred while sending the OTP code!',
                 });
             }
         } catch (error) {
             notification.error({
-                message: 'Lỗi hệ thống',
-                description: 'Không thể gửi mã OTP. Vui lòng thử lại sau.',
+                message: 'System Error',
+                description: 'Could not send OTP. Please try again later.',
             });
         } finally {
             setSendingOtp(false);
@@ -51,8 +51,8 @@ const RegisterPage = () => {
     const handleVerifyOtp = async (otpCode) => {
         if (!pendingRegister) {
             notification.error({
-                message: 'Thiếu thông tin đăng ký',
-                description: 'Vui lòng quay lại bước đầu tiên.',
+                message: 'Missing Registration Data',
+                description: 'Please go back to the first step.',
             });
             setStep(1);
             return;
@@ -67,8 +67,8 @@ const RegisterPage = () => {
 
             if (res && res.EC === 0) {
                 notification.success({
-                    message: 'Đăng ký thành công',
-                    description: 'Tài khoản của bạn đã được khởi tạo thành công. Vui lòng đăng nhập.',
+                    message: 'Registration Successful',
+                    description: 'Your account has been created successfully. Please sign in.',
                 });
                 setName('');
                 setEmail('');
@@ -80,14 +80,14 @@ const RegisterPage = () => {
                 navigate('/login');
             } else {
                 notification.error({
-                    message: 'Xác thực OTP thất bại',
-                    description: res?.EM ?? 'Mã OTP không chính xác hoặc đã hết hạn!',
+                    message: 'OTP Verification Failed',
+                    description: res?.EM ?? 'Incorrect or expired OTP code!',
                 });
             }
         } catch (error) {
             notification.error({
-                message: 'Lỗi hệ thống',
-                description: 'Xác thực OTP gặp sự cố. Vui lòng thử lại.',
+                message: 'System Error',
+                description: 'OTP verification failed. Please try again.',
             });
         } finally {
             setVerifyingOtp(false);
@@ -122,19 +122,19 @@ const RegisterPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div className="bootstrap-auth-links">
                 <Link to="/">
-                    ← Quay lại trang chủ
+                    ← Back to Home
                 </Link>
-                <Link to="/login">Đăng nhập</Link>
+                <Link to="/login">Sign In</Link>
             </div>
-            <div className="text-center mt-3 text-muted" style={{ fontSize: '0.85rem' }}>
-                Đã có tài khoản? <Link to="/login" style={{ color: '#3b82f6', fontWeight: 600 }}>Đăng nhập ngay</Link>
+            <div className="text-center mt-3" style={{ fontSize: '0.85rem' }}>
+                Already have an account? <Link to="/login" style={{ color: '#3b82f6', fontWeight: 600 }}>Sign In now</Link>
             </div>
         </div>
     );
 
     return (
         <BootstrapAuthLayout
-            title="Đăng ký"
+            title="Register"
             description={stepLabel}
             footer={footer}
         >
@@ -142,21 +142,21 @@ const RegisterPage = () => {
                 {step === 1 ? (
                     <>
                         <Form.Group className="mb-3" controlId="registerName">
-                            <Form.Label>Họ và tên</Form.Label>
+                            <Form.Label>Full Name</Form.Label>
                             <Form.Control
                                 required
                                 type="text"
-                                placeholder="Ví dụ: Nguyễn Văn A"
+                                placeholder="e.g., John Doe"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng nhập họ và tên của bạn!
+                                Please enter your full name!
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="registerEmail">
-                            <Form.Label>Email</Form.Label>
+                            <Form.Label>Email Address</Form.Label>
                             <Form.Control
                                 required
                                 type="email"
@@ -165,21 +165,21 @@ const RegisterPage = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng nhập địa chỉ email hợp lệ!
+                                Please enter a valid email address!
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-4" controlId="registerPassword">
-                            <Form.Label>Mật khẩu</Form.Label>
+                            <Form.Label>Password</Form.Label>
                             <Form.Control
                                 required
                                 type="password"
-                                placeholder="Tạo mật khẩu của bạn"
+                                placeholder="Create your password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng tạo một mật khẩu!
+                                Please create a password!
                             </Form.Control.Feedback>
                         </Form.Group>
 
@@ -187,15 +187,15 @@ const RegisterPage = () => {
                             {sendingOtp ? (
                                 <>
                                     <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                                    Đang gửi OTP...
+                                    Sending OTP...
                                 </>
-                            ) : 'Gửi mã OTP'}
+                            ) : 'Send OTP Code'}
                         </Button>
                     </>
                 ) : (
                     <>
                         <Form.Group className="mb-4 text-center" controlId="registerOtp">
-                            <Form.Label className="d-block">Mã xác thực OTP</Form.Label>
+                            <Form.Label className="d-block text-start">OTP Verification Code</Form.Label>
                             <Form.Control
                                 required
                                 type="text"
@@ -207,19 +207,19 @@ const RegisterPage = () => {
                                 style={{ letterSpacing: '8px', paddingLeft: '20px' }}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng nhập mã OTP gồm 6 chữ số!
+                                Please enter the 6-digit OTP code!
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Row className="mb-4 g-2">
                             <Col xs={6}>
                                 <Button variant="outline-light" className="w-100 py-2" onClick={resendOtp} disabled={sendingOtp} style={{ borderRadius: '12px' }}>
-                                    {sendingOtp ? 'Đang gửi...' : 'Gửi lại OTP'}
+                                    {sendingOtp ? 'Sending...' : 'Resend OTP'}
                                 </Button>
                             </Col>
                             <Col xs={6}>
                                 <Button variant="outline-light" className="w-100 py-2" onClick={() => setStep(1)} style={{ borderRadius: '12px' }}>
-                                    Quay lại
+                                    Back
                                 </Button>
                             </Col>
                         </Row>
@@ -228,9 +228,9 @@ const RegisterPage = () => {
                             {verifyingOtp ? (
                                 <>
                                     <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                                    Đang xác minh...
+                                    Verifying...
                                 </>
-                            ) : 'Xác thực & Đăng ký'}
+                            ) : 'Verify & Register'}
                         </Button>
                     </>
                 )}

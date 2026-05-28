@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Button, Card, Empty, Input, Modal, Result, Space, Spin, Tag, Timeline, Typography, notification } from 'antd';
-import { ArrowLeftOutlined, CheckCircleOutlined, ClockCircleOutlined, ReloadOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Card, Empty, Input, Modal, Popconfirm, Rate, Result, Space, Spin, Tag, Timeline, Typography, Upload, notification } from 'antd';
+import { ArrowLeftOutlined, CheckCircleOutlined, ClockCircleOutlined, DeleteOutlined, EditOutlined, ReloadOutlined, ShoppingOutlined, StarFilled, UploadOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { cancelOrderApi, getOrdersApi } from '../util/api';
+import { cancelOrderApi, getOrdersApi, createReviewApi, uploadImageApi, updateReviewApi, deleteReviewApi, getMyReviewsApi } from '../util/api';
 
 const moneyFormatter = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -38,6 +38,36 @@ const OrdersPage = () => {
     const [cancelReason, setCancelReason] = useState('');
     const [submittingCancel, setSubmittingCancel] = useState(false);
 
+    // My reviews lookup: { [productId_orderId]: reviewDoc }
+    const [myReviewsMap, setMyReviewsMap] = useState({});
+    const reviewsLoaded = useRef(false);
+
+    // Product review states
+    const [reviewOpen, setReviewOpen] = useState(false);
+    const [editingReviewId, setEditingReviewId] = useState(null); // null = create, string = edit
+    const [reviewProductId, setReviewProductId] = useState('');
+    const [reviewOrderId, setReviewOrderId] = useState('');
+    const [reviewProductName, setReviewProductName] = useState('');
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewComment, setReviewComment] = useState('');
+    const [reviewImageInput, setReviewImageInput] = useState('');
+    const [reviewImagesList, setReviewImagesList] = useState([]);
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
+
+    const loadMyReviews = async () => {
+        const res = await getMyReviewsApi();
+        if (res && res.success !== false) {
+            const map = {};
+            (res.data || []).forEach((review) => {
+                const key = `${review.productId?._id || review.productId}_${review.orderId}`;
+                map[key] = review;
+            });
+            setMyReviewsMap(map);
+        }
+        reviewsLoaded.current = true;
+    };
+
     const loadOrders = async () => {
         setLoading(true);
         const res = await getOrdersApi();
@@ -58,11 +88,15 @@ const OrdersPage = () => {
 
     useEffect(() => {
         loadOrders();
+        loadMyReviews();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const selectedOrder = useMemo(() => orders.find((o) => o.id === selectedOrderId) || null, [orders, selectedOrderId]);
     const currentStep = Math.max(ORDER_STEPS.findIndex((s) => s.status === selectedOrder?.status), 0);
+
+    const getReviewKey = (productId, orderId) => `${productId}_${orderId}`;
+    const getExistingReview = (productId, orderId) => myReviewsMap[getReviewKey(productId, orderId)] || null;
 
     const getStepTimestamp = (status) => {
         if (!selectedOrder) return null;
@@ -90,6 +124,110 @@ const OrdersPage = () => {
             await loadOrders();
         }
         setSubmittingCancel(false);
+    };
+
+    const handleOpenCreateReview = (productId, productName, orderId) => {
+        setEditingReviewId(null);
+        setReviewProductId(productId);
+        setReviewOrderId(orderId);
+        setReviewProductName(productName);
+        setReviewRating(5);
+        setReviewComment('');
+        setReviewImageInput('');
+        setReviewImagesList([]);
+        setReviewOpen(true);
+    };
+
+    const handleOpenEditReview = (review, productName) => {
+        setEditingReviewId(review._id);
+        setReviewProductId(review.productId?._id || review.productId);
+        setReviewOrderId(review.orderId);
+        setReviewProductName(productName);
+        setReviewRating(review.rating || 5);
+        setReviewComment(review.comment || '');
+        setReviewImageInput('');
+        setReviewImagesList(review.images || []);
+        setReviewOpen(true);
+    };
+
+    const handleAddReviewImage = () => {
+        if (reviewImageInput.trim()) {
+            setReviewImagesList([...reviewImagesList, reviewImageInput.trim()]);
+            setReviewImageInput('');
+        }
+    };
+
+    const handleCustomUpload = async ({ file, onSuccess, onError }) => {
+        setUploadingImage(true);
+        try {
+            const res = await uploadImageApi(file);
+            if (res && res.success !== false) {
+                setReviewImagesList((prev) => [...prev, res.url]);
+                notification.success({ message: 'Tải ảnh thành công', description: 'Hình ảnh đã được tải lên Cloudinary an toàn!' });
+                onSuccess(null, file);
+            } else {
+                notification.error({ message: 'Lỗi tải ảnh', description: res?.message || 'Có lỗi xảy ra.' });
+                onError(new Error('Tải ảnh thất bại'));
+            }
+        } catch (err) {
+            notification.error({ message: 'Lỗi tải ảnh', description: err.message });
+            onError(err);
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const handleRemoveReviewImage = (index) => {
+        setReviewImagesList(reviewImagesList.filter((_, idx) => idx !== index));
+    };
+
+    const handleSubmitReview = async () => {
+        if (!reviewRating) {
+            notification.error({ message: 'Lỗi', description: 'Vui lòng chọn số sao đánh giá' });
+            return;
+        }
+        setSubmittingReview(true);
+
+        let res;
+        if (editingReviewId) {
+            res = await updateReviewApi(editingReviewId, {
+                rating: reviewRating,
+                comment: reviewComment,
+                images: reviewImagesList,
+            });
+        } else {
+            res = await createReviewApi({
+                productId: reviewProductId,
+                orderId: reviewOrderId || selectedOrder?.id,
+                rating: reviewRating,
+                comment: reviewComment,
+                images: reviewImagesList,
+            });
+        }
+
+        if (res && res.success !== false) {
+            notification.success({
+                message: editingReviewId ? 'Cập nhật đánh giá thành công' : 'Đánh giá thành công',
+                description: editingReviewId
+                    ? 'Đánh giá của bạn đã được cập nhật.'
+                    : 'Cảm ơn bạn đã đánh giá! Bạn đã được cộng +10 điểm thưởng.',
+            });
+            setReviewOpen(false);
+            await loadMyReviews();
+        } else {
+            notification.error({ message: 'Lỗi', description: res?.message || 'Có lỗi xảy ra khi gửi đánh giá' });
+        }
+        setSubmittingReview(false);
+    };
+
+    const handleDeleteReview = async (reviewId) => {
+        const res = await deleteReviewApi(reviewId);
+        if (res && res.success !== false) {
+            notification.success({ message: 'Đã xóa đánh giá' });
+            await loadMyReviews();
+        } else {
+            notification.error({ message: 'Lỗi xóa đánh giá', description: res?.message });
+        }
     };
 
     if (loading) {
@@ -237,26 +375,81 @@ const OrdersPage = () => {
                                 <Card className="content-card" bordered={false} size="small" title="Thông tin thanh toán">
                                     <div style={{ display: 'grid', gap: 6 }}>
                                         <span>Phương thức: <strong>{selectedOrder.paymentMethodLabel}</strong></span>
-                                        <span>Trạng thái: <strong>{selectedOrder.paymentStatus}</strong></span>
-                                        <span>Tổng tiền: <strong style={{ color: 'var(--store-primary)' }}>{moneyFormatter.format(selectedOrder.total || 0)}</strong></span>
+                                        <span>Tạm tính: <strong>{moneyFormatter.format(selectedOrder.subtotal || 0)}</strong></span>
+                                        <span>Phí ship: <strong>{moneyFormatter.format(selectedOrder.shippingFee || 0)}</strong></span>
+                                        {selectedOrder.discount > 0 && (
+                                            <span style={{ color: '#16a34a' }}>
+                                                Giảm giá ({selectedOrder.voucherCode}): <strong>−{moneyFormatter.format(selectedOrder.discount)}</strong>
+                                            </span>
+                                        )}
+                                        <span>Tổng cộng: <strong style={{ color: 'var(--store-primary)', fontSize: '1.05rem' }}>{moneyFormatter.format(selectedOrder.total || 0)}</strong></span>
                                     </div>
                                 </Card>
                             </div>
 
-                            {/* Products */}
+                            {/* Products with Review */}
                             <Card className="content-card" bordered={false} size="small" title={`Sản phẩm (${selectedOrder.items?.length || 0})`}>
                                 <div style={{ display: 'grid', gap: 16 }}>
-                                    {selectedOrder.items?.map((item) => (
-                                        <div key={`${item.productId}-${item.slug}`} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                                            <img src={item.image} alt={item.name}
-                                                style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 14, border: '1px solid var(--store-border)' }} />
-                                            <div style={{ flex: 1 }}>
-                                                <strong style={{ display: 'block', marginBottom: 4 }}>{item.name}</strong>
-                                                <div className="content-card__text">Số lượng: {item.quantity}</div>
-                                                <div style={{ color: 'var(--store-primary)', fontWeight: 700 }}>{moneyFormatter.format(item.lineTotal)}</div>
+                                    {selectedOrder.items?.map((item) => {
+                                        const existingReview = getExistingReview(item.productId, selectedOrder.id);
+                                        return (
+                                            <div key={`${item.productId}-${item.slug}`} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                                                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flex: 1 }}>
+                                                    <img src={item.image} alt={item.name}
+                                                        style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 14, border: '1px solid var(--store-border)' }} />
+                                                    <div style={{ flex: 1 }}>
+                                                        <strong style={{ display: 'block', marginBottom: 4 }}>{item.name}</strong>
+                                                        <div className="content-card__text">Số lượng: {item.quantity}</div>
+                                                        <div style={{ color: 'var(--store-primary)', fontWeight: 700 }}>{moneyFormatter.format(item.lineTotal)}</div>
+                                                        {existingReview && (
+                                                            <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                                <Rate disabled value={existingReview.rating} style={{ fontSize: 12 }} />
+                                                                <span style={{ fontSize: '0.8rem', color: 'var(--store-muted)' }}>Đã đánh giá</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {selectedOrder.status === 'delivered' && (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end', marginTop: 8 }}>
+                                                        {existingReview ? (
+                                                            <>
+                                                                <Button
+                                                                    size="small"
+                                                                    icon={<EditOutlined />}
+                                                                    onClick={() => handleOpenEditReview(existingReview, item.name)}
+                                                                    style={{ borderRadius: 999 }}
+                                                                >
+                                                                    Sửa
+                                                                </Button>
+                                                                <Popconfirm
+                                                                    title="Xóa đánh giá này?"
+                                                                    description="Điểm thưởng sẽ bị thu hồi khi xóa đánh giá."
+                                                                    onConfirm={() => handleDeleteReview(existingReview._id)}
+                                                                    okText="Xóa"
+                                                                    cancelText="Hủy"
+                                                                    okButtonProps={{ danger: true }}
+                                                                >
+                                                                    <Button size="small" danger icon={<DeleteOutlined />} style={{ borderRadius: 999 }}>
+                                                                        Xóa
+                                                                    </Button>
+                                                                </Popconfirm>
+                                                            </>
+                                                        ) : (
+                                                            <Button
+                                                                type="primary"
+                                                                size="middle"
+                                                                icon={<StarFilled />}
+                                                                onClick={() => handleOpenCreateReview(item.productId, item.name, selectedOrder.id)}
+                                                                style={{ borderRadius: 999, fontWeight: 700 }}
+                                                            >
+                                                                Đánh giá
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </Card>
 
@@ -316,6 +509,86 @@ const OrdersPage = () => {
                     onChange={(e) => setCancelReason(e.target.value)}
                     placeholder="Nhập lý do hủy hoặc lý do muốn shop hỗ trợ hủy đơn"
                 />
+            </Modal>
+
+            {/* Product Review Modal */}
+            <Modal
+                title={editingReviewId ? `Sửa đánh giá: ${reviewProductName}` : `Đánh giá sản phẩm: ${reviewProductName}`}
+                open={reviewOpen}
+                onCancel={() => setReviewOpen(false)}
+                onOk={handleSubmitReview}
+                okText={editingReviewId ? 'Cập nhật đánh giá' : 'Gửi đánh giá'}
+                confirmLoading={submittingReview}
+                destroyOnClose
+            >
+                <div style={{ display: 'grid', gap: '16px', padding: '10px 0' }}>
+                    <div>
+                        <div style={{ fontWeight: 600, marginBottom: '6px' }}>Số sao đánh giá:</div>
+                        <Rate value={reviewRating} onChange={setReviewRating} style={{ fontSize: '24px' }} />
+                    </div>
+
+                    <div>
+                        <div style={{ fontWeight: 600, marginBottom: '6px' }}>Nội dung đánh giá:</div>
+                        <Input.TextArea
+                            rows={4}
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                            placeholder="Chia sẻ cảm nhận của bạn về sản phẩm (chất lượng, đóng gói, giao hàng...)"
+                        />
+                    </div>
+
+                    <div>
+                        <div style={{ fontWeight: 600, marginBottom: '8px' }}>Hình ảnh sản phẩm:</div>
+                        <div style={{ display: 'grid', gap: '12px', marginBottom: '12px' }}>
+                            <Upload
+                                accept="image/*"
+                                showUploadList={false}
+                                customRequest={handleCustomUpload}
+                                disabled={uploadingImage}
+                            >
+                                <Button icon={<UploadOutlined />} loading={uploadingImage} style={{ borderRadius: 8, width: '100%' }}>
+                                    Tải ảnh lên từ máy tính (lưu Cloudinary an toàn)
+                                </Button>
+                            </Upload>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ color: '#94a3b8', fontSize: '0.8rem', background: '#ffffff', padding: '0 8px', position: 'relative', zIndex: 1 }}>HOẶC DÁN LINK URL ẢNH</span>
+                                <div style={{ borderBottom: '1px dashed #e2e8f0', width: '100%', position: 'absolute' }}></div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <Input
+                                    value={reviewImageInput}
+                                    onChange={(e) => setReviewImageInput(e.target.value)}
+                                    placeholder="Dán link hình ảnh trực tiếp tại đây..."
+                                    onPressEnter={handleAddReviewImage}
+                                    style={{ borderRadius: 8 }}
+                                />
+                                <Button onClick={handleAddReviewImage} style={{ borderRadius: 8 }}>Thêm</Button>
+                            </div>
+                        </div>
+                        {reviewImagesList.length > 0 && (
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                                {reviewImagesList.map((url, idx) => (
+                                    <div key={idx} style={{ position: 'relative', width: '60px', height: '60px', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                                        <img src={url} alt="attachment" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveReviewImage(idx)}
+                                            style={{
+                                                position: 'absolute', top: '2px', right: '2px',
+                                                background: '#ef4444', color: '#ffffff', border: 'none',
+                                                borderRadius: '50%', width: '16px', height: '16px',
+                                                fontSize: '10px', fontWeight: 'bold', cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0
+                                            }}
+                                        >✕</button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </Modal>
         </div>
     );

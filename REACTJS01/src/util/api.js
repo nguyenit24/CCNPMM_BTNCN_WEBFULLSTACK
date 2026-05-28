@@ -407,4 +407,90 @@ export {
     deletePostApi,
     refreshTokenApi,
     logoutApi,
+    createReviewApi,
+    getProductReviewsApi,
+    getMyRewardsApi,
+    addFavoriteApi,
+    removeFavoriteApi,
+    getMyFavoritesApi,
+    addViewHistoryApi,
+    getMyViewHistoryApi,
+    getProductStatisticsApi,
+    uploadImageApi,
+    getMyVouchersApi,
+    redeemVoucherApi,
+    validateVoucherApi,
+    getVoucherOptionsApi,
+    updateReviewApi,
+    deleteReviewApi,
+    getMyReviewsApi,
+    calculateShippingApi,
+}
+
+const getMyVouchersApi = () => axios.get('/v1/api/vouchers/me');
+const redeemVoucherApi = (type) => axios.post('/v1/api/vouchers/redeem', { type });
+const validateVoucherApi = (code, subtotal, shippingFee) => axios.post('/v1/api/vouchers/validate', { code, subtotal, shippingFee });
+const getVoucherOptionsApi = () => axios.get('/v1/api/vouchers/options');
+
+const updateReviewApi = (reviewId, data = {}) => axios.put(`/v1/api/reviews/${reviewId}`, data);
+const deleteReviewApi = (reviewId) => axios.delete(`/v1/api/reviews/${reviewId}`);
+const getMyReviewsApi = () => axios.get('/v1/api/reviews/me');
+
+const calculateShippingApi = (province) => axios.post('/v1/api/shipping/calculate', { province });
+
+
+const createReviewApi = (data = {}) => {
+    const URL_API = "/v1/api/reviews";
+    return axios.post(URL_API, data);
+}
+
+const getProductReviewsApi = (productId, params = {}) => {
+    const URL_API = `/v1/api/reviews/product/${productId}`;
+    return axios.get(URL_API, { params });
+}
+
+const getMyRewardsApi = () => {
+    const URL_API = "/v1/api/rewards/me";
+    return axios.get(URL_API);
+}
+
+const addFavoriteApi = (productId) => {
+    const URL_API = "/v1/api/favorites";
+    return axios.post(URL_API, { productId });
+}
+
+const removeFavoriteApi = (productId) => {
+    const URL_API = `/v1/api/favorites/${productId}`;
+    return axios.delete(URL_API);
+}
+
+const getMyFavoritesApi = (params = {}) => {
+    const URL_API = "/v1/api/favorites/me";
+    return axios.get(URL_API, { params });
+}
+
+const addViewHistoryApi = (productId) => {
+    const URL_API = `/v1/api/view-history/${productId}`;
+    return axios.post(URL_API);
+}
+
+const getMyViewHistoryApi = (params = {}) => {
+    const URL_API = "/v1/api/view-history/me";
+    return axios.get(URL_API, { params });
+}
+
+const getProductStatisticsApi = (productId) => {
+    const URL_API = `/v1/api/products/${productId}/statistics`;
+    return axios.get(URL_API);
+}
+
+const uploadImageApi = (file) => {
+    const URL_API = "/v1/api/upload";
+    const formData = new FormData();
+    formData.append("file", file);
+    return axios.post(URL_API, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    });
 }

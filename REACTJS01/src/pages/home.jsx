@@ -57,6 +57,17 @@ const TopProductsSection = ({ eyebrow, title, subtitle, items, loading, railRef,
     </section>
 );
 
+const HERO_SLIDES = [
+    // {
+    //     slug: 'banner-laptop-promotions',
+    //     banner: 'https://theme.hstatic.net/200000832565/1001285131/14/slide_3_img.jpg?v=314'
+    // },
+    {
+        slug: 'banner-laptop-sales',
+        banner: 'https://bizweb.dktcdn.net/100/487/578/themes/911283/assets/slider_2.jpg?1769673324469'
+    }
+];
+
 const HomePage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -115,47 +126,32 @@ const HomePage = () => {
     if (!data) return null;
 
     const promotions = Array.isArray(data.promotions) ? data.promotions : [];
-    const heroSlides = promotions.length > 0 ? promotions : [data.heroPromotion].filter(Boolean);
+    const heroSlides = HERO_SLIDES;
 
     return (
         <div className="home-page-wrapper">
-            <div className="home-container">
-                {/* Hero Banner Carousel - Constrained within the container for perfect design */}
-                <section className="store-hero store-hero--solo">
-                    <div className="store-hero__panel">
-                        <Carousel autoplay dots autoplaySpeed={4500}>
-                            {heroSlides.map((promo) => (
-                                <div
-                                    key={promo.slug}
-                                    className="store-hero__slide"
-                                    style={{ backgroundImage: `url(${promo.banner})` }}
-                                >
-                                    <div className="store-hero__content-overlay">
-                                        <div className="store-hero__content">
-                                            <div className="store-hero__eyebrow">
-                                                <ThunderboltOutlined />
-                                                {promo.badge}
-                                            </div>
-                                            <h1 className="store-hero__title">{promo.title}</h1>
-                                            <p className="store-hero__description">{promo.description}</p>
-                                            <p className="store-hero__description">{promo.highlight}</p>
-                                            <div className="store-hero__actions">
-                                                <Button type="primary" size="large" onClick={() => navigate('/products')} style={{ borderRadius: 999, fontWeight: 700 }}>
-                                                    Khám phá ngay
-                                                </Button>
-                                                <Button size="large" onClick={() => navigate('/products?onSale=true')}
-                                                    style={{ borderRadius: 999, fontWeight: 700, borderColor: 'rgba(255,255,255,0.4)', color: '#fff', background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
-                                                    Xem khuyến mãi
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </Carousel>
-                    </div>
-                </section>
+            {/* Hero Banner Carousel - Full screen width banner */}
+            <section className="store-hero store-hero--solo">
+                <div className="store-hero__panel">
+                    <Carousel autoplay dots autoplaySpeed={4500} effect="fade">
+                        {heroSlides.map((promo) => (
+                            <div
+                                key={promo.slug}
+                                className="store-hero__slide-image-wrapper"
+                                onClick={() => navigate('/products')}
+                            >
+                                <img
+                                    src={promo.banner}
+                                    alt="TechStudio Premium Banner"
+                                    className="store-hero__slide-image"
+                                />
+                            </div>
+                        ))}
+                    </Carousel>
+                </div>
+            </section>
 
+            <div className="home-container">
                 {/* Featured Promotions */}
                 {promotions.length > 0 && (
                     <section className="store-section">

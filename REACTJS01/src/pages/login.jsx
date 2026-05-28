@@ -37,8 +37,8 @@ const LoginPage = () => {
                 }
 
                 notification.success({
-                    message: 'Đăng nhập thành công',
-                    description: 'Chào mừng bạn quay trở lại với TechStudio',
+                    message: 'Sign In Successful',
+                    description: 'Welcome back to TechStudio Premium',
                 });
 
                 setAuth({
@@ -63,14 +63,14 @@ const LoginPage = () => {
                 }
             } else {
                 notification.error({
-                    message: 'Đăng nhập thất bại',
-                    description: res?.EM ?? 'Email hoặc mật khẩu không chính xác!',
+                    message: 'Sign In Failed',
+                    description: res?.EM ?? 'Incorrect email or password!',
                 });
             }
         } catch (error) {
             notification.error({
-                message: 'Đăng nhập thất bại',
-                description: 'Đã xảy ra lỗi kết nối máy chủ.',
+                message: 'Sign In Failed',
+                description: 'Server connection error occurred.',
             });
         } finally {
             setLoading(false);
@@ -81,25 +81,25 @@ const LoginPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div className="bootstrap-auth-links">
                 <Link to="/">
-                    ← Quay lại trang chủ
+                    ← Back to Home
                 </Link>
-                <Link to="/forgot-password">Quên mật khẩu?</Link>
+                <Link to="/forgot-password">Forgot Password?</Link>
             </div>
-            <div className="text-center mt-3 text-muted" style={{ fontSize: '0.85rem' }}>
-                Chưa có tài khoản? <Link to="/register" style={{ color: '#3b82f6', fontWeight: 600 }}>Đăng ký ngay</Link>
+            <div className="text-center mt-3" style={{ fontSize: '0.85rem' }}>
+                Don't have an account? <Link to="/register" style={{ color: '#3b82f6', fontWeight: 600 }}>Register now</Link>
             </div>
         </div>
     );
 
     return (
         <BootstrapAuthLayout
-            title="Đăng nhập"
-            description="Đăng nhập tài khoản để mua sắm công nghệ đỉnh cao"
+            title="Sign In"
+            description="Sign in to access your premium technology experience"
             footer={footer}
         >
             <Form noValidate validated={validated} onSubmit={handleSubmit} className="bootstrap-auth-form">
                 <Form.Group className="mb-3" controlId="loginEmail">
-                    <Form.Label>Email</Form.Label>
+                    <Form.Label>Email Address</Form.Label>
                     <Form.Control
                         required
                         type="email"
@@ -108,21 +108,21 @@ const LoginPage = () => {
                         onChange={(e) => setEmail(e.target.value)}
                     />
                     <Form.Control.Feedback type="invalid">
-                        Vui lòng nhập địa chỉ email hợp lệ!
+                        Please enter a valid email address!
                     </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-4" controlId="loginPassword">
-                    <Form.Label>Mật khẩu</Form.Label>
+                    <Form.Label>Password</Form.Label>
                     <Form.Control
                         required
                         type="password"
-                        placeholder="Nhập mật khẩu"
+                        placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <Form.Control.Feedback type="invalid">
-                        Vui lòng nhập mật khẩu!
+                        Please enter your password!
                     </Form.Control.Feedback>
                 </Form.Group>
 
@@ -130,9 +130,9 @@ const LoginPage = () => {
                     {loading ? (
                         <>
                             <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                            Đang xử lý...
+                            Signing In...
                         </>
-                    ) : 'Đăng nhập'}
+                    ) : 'Sign In'}
                 </Button>
             </Form>
         </BootstrapAuthLayout>

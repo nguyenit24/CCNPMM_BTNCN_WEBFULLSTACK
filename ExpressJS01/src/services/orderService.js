@@ -4,6 +4,8 @@ const { Order, ORDER_STATUSES } = require('../models/order');
 const Cart = require('../models/cart');
 const Product = require('../models/product');
 const User = require('../models/user');
+const { validateVoucherService, markVoucherUsedService } = require('./voucherService');
+const { calculateShippingFee } = require('./shippingService');
 
 const createError = (status, message) => {
     const error = new Error(message);
@@ -134,6 +136,8 @@ const serializeOrder = (order) => {
         items,
         subtotal: Number(source.subtotal || 0),
         shippingFee: Number(source.shippingFee || 0),
+        discount: Number(source.discount || 0),
+        voucherCode: source.voucherCode || '',
         total: Number(source.total || 0),
         paymentMethod: source.paymentMethod || 'COD',
         paymentMethodLabel: 'Thanh toán khi nhận hàng (COD)',
@@ -370,7 +374,33 @@ const checkoutOrderService = async (userId, payload = {}) => {
                 });
             }
 
-            const shippingFee = Number(payload.shippingFee || 0);
+            // --- Voucher application ---
+            let discountAmount = 0;
+            let shippingDiscount = 0;
+            let appliedVoucher = null;
+            const voucherCode = normalizeText(payload.voucherCode);
+
+            // Calculate shipping fee based on province if not manually passed
+            let shippingFee = Number(payload.shippingFee || 0);
+            if (!shippingFee && selectedAddress?.province) {
+                const shippingResult = calculateShippingFee(selectedAddress.province);
+                shippingFee = shippingResult.fee;
+            }
+
+            if (voucherCode) {
+                try {
+                    const voucherResult = await validateVoucherService(userId, voucherCode, subtotal, shippingFee);
+                    discountAmount = voucherResult.discountAmount || 0;
+                    shippingDiscount = voucherResult.shippingDiscount || 0;
+                    appliedVoucher = voucherResult;
+                } catch (voucherError) {
+                    throw createError(voucherError.status || 400, voucherError.message || 'Mã voucher không hợp lệ');
+                }
+            }
+
+            const finalShippingFee = Math.max(shippingFee - shippingDiscount, 0);
+            const finalTotal = Math.max(subtotal + finalShippingFee - discountAmount, 0);
+
             const orderDoc = await Order.create([
                 {
                     orderCode: `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
@@ -383,8 +413,10 @@ const checkoutOrderService = async (userId, payload = {}) => {
                     shippingAddress: selectedAddress,
                     items: orderItems,
                     subtotal,
-                    shippingFee,
-                    total: subtotal + shippingFee,
+                    shippingFee: finalShippingFee,
+                    discount: discountAmount,
+                    voucherCode: appliedVoucher ? appliedVoucher.code : '',
+                    total: finalTotal,
                     paymentMethod: 'COD',
                     paymentStatus: 'pending',
                     status: 'new',
@@ -399,6 +431,11 @@ const checkoutOrderService = async (userId, payload = {}) => {
                     autoConfirmAt: new Date(Date.now() + 30 * 60 * 1000),
                 },
             ], { session });
+
+            // Mark voucher as used after order is created
+            if (appliedVoucher) {
+                await markVoucherUsedService(appliedVoucher.voucherId, orderDoc[0]._id);
+            }
 
             await Cart.deleteOne({ userId }).session(session);
             createdOrder = orderDoc[0];

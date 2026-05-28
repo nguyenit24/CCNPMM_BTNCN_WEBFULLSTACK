@@ -84,6 +84,10 @@ const Header = () => {
                     key: 'orders',
                     label: <Link to="/orders">Đơn hàng của tôi</Link>,
                 },
+                {
+                    key: 'favorites',
+                    label: <Link to="/favorites">Sản phẩm yêu thích</Link>,
+                },
                 { type: 'divider' }
             );
         }
@@ -125,9 +129,14 @@ const Header = () => {
                     Posts
                 </NavLink>
                 {auth.isAuthenticated && String(auth?.user?.role || '').toLowerCase() !== 'admin' ? (
-                    <NavLink to="/orders" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
-                        Đơn hàng
-                    </NavLink>
+                    <>
+                        <NavLink to="/orders" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
+                            Đơn hàng
+                        </NavLink>
+                        <NavLink to="/favorites" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>
+                            Yêu thích
+                        </NavLink>
+                    </>
                 ) : null}
                 {showAdminLink ? (
                     <NavLink to="/admin" className={({ isActive }) => `store-nav__link ${isActive ? 'active' : ''}`}>

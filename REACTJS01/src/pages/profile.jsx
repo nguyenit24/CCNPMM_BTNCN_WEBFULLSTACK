@@ -1,9 +1,9 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { Button, Card, Checkbox, Col, Divider, Empty, Form, Input, Modal, Popconfirm, Row, Space, Tag, notification } from 'antd';
-import { ArrowLeftOutlined, CheckOutlined, DeleteOutlined, EditOutlined, HomeOutlined, PlusOutlined, ShoppingOutlined, UserOutlined, MailOutlined, EnvironmentOutlined } from '@ant-design/icons';
+﻿import { useContext, useEffect, useMemo, useState } from 'react';
+import { Button, Card, Checkbox, Col, Divider, Empty, Form, Input, Modal, Popconfirm, Row, Space, Tag, Table, Spin, notification } from 'antd';
+import { ArrowLeftOutlined, CheckOutlined, DeleteOutlined, EditOutlined, GiftOutlined, HomeOutlined, PlusOutlined, ShoppingOutlined, UserOutlined, MailOutlined, EnvironmentOutlined, TrophyFilled, StarOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../components/context/auth.context';
-import { addAccountAddressApi, deleteAccountAddressApi, getAccountApi, updateAccountAddressApi, updateAccountProfileApi } from '../util/api';
+import { addAccountAddressApi, deleteAccountAddressApi, getAccountApi, updateAccountAddressApi, updateAccountProfileApi, getMyRewardsApi, getMyVouchersApi, redeemVoucherApi } from '../util/api';
 
 const ProfilePage = ({ isInsideAdmin = false }) => {
     const navigate = useNavigate();
@@ -60,6 +60,67 @@ const ProfilePage = ({ isInsideAdmin = false }) => {
         }));
     };
 
+    // Rewards integration
+    const [rewardsData, setRewardsData] = useState({ totalPoints: 0, history: [] });
+    const [rewardsLoading, setRewardsLoading] = useState(false);
+
+    // Voucher integration
+    const [myVouchers, setMyVouchers] = useState([]);
+    const [vouchersLoading, setVouchersLoading] = useState(false);
+    const [redeemingVoucher, setRedeemingVoucher] = useState(null); // 'percent_discount' | 'free_shipping' | null
+
+    const VOUCHER_OPTIONS = [
+        {
+            type: 'percent_discount',
+            label: '🎟️ Voucher giảm 10%',
+            description: 'Giảm 10% tổng đơn hàng (tối đa 200.000đ)',
+            pointsCost: 100,
+            color: 'purple',
+        },
+        {
+            type: 'free_shipping',
+            label: '🚚 Voucher miễn phí ship',
+            description: 'Miễn phí vận chuyển cho đơn hàng tiếp theo',
+            pointsCost: 100,
+            color: 'cyan',
+        },
+    ];
+
+    const loadRewards = async () => {
+        setRewardsLoading(true);
+        const res = await getMyRewardsApi();
+        if (res && res.success !== false) {
+            setRewardsData(res.data || res);
+        } else {
+            console.log("Không thể tải thông tin tích điểm thưởng", res?.message);
+        }
+        setRewardsLoading(false);
+    };
+
+    const loadVouchers = async () => {
+        setVouchersLoading(true);
+        const res = await getMyVouchersApi();
+        if (res && res.success !== false) {
+            setMyVouchers(res.data || []);
+        }
+        setVouchersLoading(false);
+    };
+
+    const handleRedeemVoucher = async (type) => {
+        setRedeemingVoucher(type);
+        const res = await redeemVoucherApi(type);
+        if (res && res.success !== false) {
+            notification.success({
+                message: 'Đổi điểm thành công! 🎉',
+                description: `Voucher đã được tạo. Kiểm tra danh sách voucher bên dưới.`,
+            });
+            await Promise.all([loadRewards(), loadVouchers()]);
+        } else {
+            notification.error({ message: 'Không thể đổi voucher', description: res?.message || 'Bạn chưa đủ điểm hoặc có lỗi xảy ra.' });
+        }
+        setRedeemingVoucher(null);
+    };
+
     const loadAccount = async () => {
         setLoading(true);
         const res = await getAccountApi();
@@ -71,7 +132,13 @@ const ProfilePage = ({ isInsideAdmin = false }) => {
         setLoading(false);
     };
 
-    useEffect(() => { loadAccount(); }, []);
+    useEffect(() => { 
+        loadAccount();
+        if (auth?.isAuthenticated && String(auth?.user?.role || '').toLowerCase() !== 'admin') {
+            loadRewards();
+            loadVouchers();
+        }
+    }, [auth?.isAuthenticated]);
 
     // --- Action Handlers for Storefront multiple addresses ---
     const openCreateAddress = () => {
@@ -479,90 +546,148 @@ const ProfilePage = ({ isInsideAdmin = false }) => {
                     </Card>
                 </Col>
 
-                {/* Address List Column */}
+                {/* Address List & Loyalty Points Column */}
                 <Col xs={24} lg={16}>
-                    <Card
-                        className="content-card"
-                        bordered={false}
-                        title={
-                            <span style={{ fontWeight: 800, fontSize: '1rem' }}>
-                                <HomeOutlined style={{ marginRight: 8, color: 'var(--store-primary)' }} />
-                                Danh sách địa chỉ giao hàng
-                            </span>
-                        }
-                        extra={(
-                            <Button type="primary" icon={<PlusOutlined />} onClick={openCreateAddress}
-                                style={{ borderRadius: 999, fontWeight: 700 }}>
-                                Thêm địa chỉ
-                            </Button>
-                        )}
-                        loading={loading}
-                    >
-                        {addresses.length > 0 ? (
-                            <div className="store-grid--2">
-                                {addresses.map((address) => (
-                                    <Card
-                                        key={address.id || address._id}
-                                        className="content-card"
-                                        bordered={false}
-                                        size="small"
-                                        style={{
-                                            height: '100%',
-                                            border: address.isDefault ? '2px solid rgba(37,99,235,0.25)' : '1px solid var(--store-border)',
-                                            background: address.isDefault ? 'rgba(37,99,235,0.03)' : undefined,
-                                        }}
-                                    >
-                                        <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                                                <div>
-                                                    <strong style={{ fontSize: '0.97rem' }}>{address.label || 'Địa chỉ'}</strong>
-                                                    <p className="content-card__text" style={{ margin: '5px 0 0', fontSize: '0.88rem' }}>
-                                                        {address.recipientName} · {address.phone}
-                                                    </p>
-                                                </div>
-                                                {address.isDefault ? <Tag color="green">Mặc định</Tag> : null}
-                                            </div>
-
-                                            <div>
-                                                <p className="content-card__text" style={{ marginBottom: 6, fontSize: '0.88rem' }}>
-                                                    {address.formattedAddress}
-                                                </p>
-                                                {address.googleMapsLink ? (
-                                                    <a href={address.googleMapsLink} target="_blank" rel="noreferrer"
-                                                        style={{ fontSize: '0.85rem', color: 'var(--store-primary)', fontWeight: 600 }}>
-                                                        Xem bản đồ →
-                                                    </a>
-                                                ) : null}
-                                            </div>
-
-                                            <Space wrap size={6}>
-                                                <Button size="small" icon={<EditOutlined />} onClick={() => openEditAddress(address)}
-                                                    style={{ borderRadius: 999 }}>Sửa</Button>
-                                                <Button size="small" icon={<CheckOutlined />} onClick={() => handleSetDefault(address)}
-                                                    disabled={address.isDefault} style={{ borderRadius: 999 }}>Đặt mặc định</Button>
-                                                <Popconfirm title="Xóa địa chỉ này?" okText="Xóa" cancelText="Hủy" onConfirm={() => handleDeleteAddress(address)}>
-                                                    <Button size="small" danger icon={<DeleteOutlined />} style={{ borderRadius: 999 }}>Xóa</Button>
-                                                </Popconfirm>
-                                            </Space>
-                                        </Space>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                            <Empty
-                                description="Bạn chưa có địa chỉ giao hàng nào"
-                                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                style={{ padding: '24px 0' }}
-                            >
+                    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+                        {/* Address List Card */}
+                        <Card
+                            className="content-card"
+                            bordered={false}
+                            title={
+                                <span style={{ fontWeight: 800, fontSize: '1rem' }}>
+                                    <HomeOutlined style={{ marginRight: 8, color: 'var(--store-primary)' }} />
+                                    Danh sách địa chỉ giao hàng
+                                </span>
+                            }
+                            extra={(
                                 <Button type="primary" icon={<PlusOutlined />} onClick={openCreateAddress}
                                     style={{ borderRadius: 999, fontWeight: 700 }}>
-                                    Thêm địa chỉ đầu tiên
+                                    Thêm địa chỉ
                                 </Button>
-                            </Empty>
+                            )}
+                            loading={loading}
+                        >
+                            {addresses.length > 0 ? (
+                                <div className="store-grid--2">
+                                    {addresses.map((address) => (
+                                        <Card
+                                            key={address.id || address._id}
+                                            className="content-card"
+                                            bordered={false}
+                                            size="small"
+                                            style={{
+                                                height: '100%',
+                                                border: address.isDefault ? '2px solid rgba(37,99,235,0.25)' : '1px solid var(--store-border)',
+                                                background: address.isDefault ? 'rgba(37,99,235,0.03)' : undefined,
+                                            }}
+                                        >
+                                            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                                                    <div>
+                                                        <strong style={{ fontSize: '0.97rem' }}>{address.label || 'Địa chỉ'}</strong>
+                                                        <p className="content-card__text" style={{ margin: '5px 0 0', fontSize: '0.88rem' }}>
+                                                            {address.recipientName} · {address.phone}
+                                                        </p>
+                                                    </div>
+                                                    {address.isDefault ? <Tag color="green">Mặc định</Tag> : null}
+                                                </div>
+
+                                                <div>
+                                                    <p className="content-card__text" style={{ marginBottom: 6, fontSize: '0.88rem' }}>
+                                                        {address.formattedAddress}
+                                                    </p>
+                                                    {address.googleMapsLink ? (
+                                                        <a href={address.googleMapsLink} target="_blank" rel="noreferrer"
+                                                            style={{ fontSize: '0.85rem', color: 'var(--store-primary)', fontWeight: 600 }}>
+                                                            Xem bản đồ →
+                                                        </a>
+                                                    ) : null}
+                                                </div>
+
+                                                <Space wrap size={6}>
+                                                    <Button size="small" icon={<EditOutlined />} onClick={() => openEditAddress(address)}
+                                                        style={{ borderRadius: 999 }}>Sửa</Button>
+                                                    <Button size="small" icon={<CheckOutlined />} onClick={() => handleSetDefault(address)}
+                                                        disabled={address.isDefault} style={{ borderRadius: 999 }}>Đặt mặc định</Button>
+                                                    <Popconfirm title="Xóa địa chỉ này?" okText="Xóa" cancelText="Hủy" onConfirm={() => handleDeleteAddress(address)}>
+                                                        <Button size="small" danger icon={<DeleteOutlined />} style={{ borderRadius: 999 }}>Xóa</Button>
+                                                    </Popconfirm>
+                                                </Space>
+                                            </Space>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Empty
+                                    description="Bạn chưa có địa chỉ giao hàng nào"
+                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                    style={{ padding: '24px 0' }}
+                                >
+                                    <Button type="primary" icon={<PlusOutlined />} onClick={openCreateAddress}
+                                        style={{ borderRadius: 999, fontWeight: 700 }}>
+                                        Thêm địa chỉ đầu tiên
+                                    </Button>
+                                </Empty>
+                            )}
+                        </Card>
+
+                        {/* Reward points navigation card */}
+                        {String(auth?.user?.role || '').toLowerCase() !== 'admin' && (
+                            <div
+                                onClick={() => navigate('/rewards')}
+                                style={{
+                                    background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 60%, #7c3aed 100%)',
+                                    borderRadius: 20,
+                                    padding: '24px 28px',
+                                    color: '#ffffff',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 16,
+                                    boxShadow: '0 8px 28px rgba(59,130,246,0.22)',
+                                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 36px rgba(59,130,246,0.32)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 28px rgba(59,130,246,0.22)'; }}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && navigate('/rewards')}
+                            >
+                                {/* BG decoration */}
+                                <div style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+                                <div style={{ position: 'relative', zIndex: 1 }}>
+                                    <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8, fontWeight: 700, marginBottom: 6 }}>
+                                        Điểm thành viên
+                                    </div>
+                                    <div style={{ fontSize: '2rem', fontWeight: 900, lineHeight: 1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                                        {rewardsLoading ? <Spin size="small" /> : (rewardsData.totalPoints || 0).toLocaleString('vi-VN')}
+                                        <span style={{ fontSize: '1rem', opacity: 0.8, fontWeight: 600 }}>điểm</span>
+                                    </div>
+                                    <div style={{ marginTop: 8, fontSize: '0.85rem', opacity: 0.75 }}>
+                                        Nhấn để xem voucher & lịch sử tích điểm →
+                                    </div>
+                                </div>
+                                <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+                                    <TrophyFilled style={{ fontSize: '2.5rem', opacity: 0.3 }} />
+                                    <Button
+                                        type="default"
+                                        size="small"
+                                        icon={<GiftOutlined />}
+                                        style={{ borderRadius: 999, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', fontWeight: 700 }}
+                                        onClick={(e) => { e.stopPropagation(); navigate('/rewards'); }}
+                                    >
+                                        Đổi điểm
+                                    </Button>
+                                </div>
+                            </div>
                         )}
-                    </Card>
+                    </Space>
                 </Col>
             </Row>
+
 
             {/* Address Modal */}
             <Modal

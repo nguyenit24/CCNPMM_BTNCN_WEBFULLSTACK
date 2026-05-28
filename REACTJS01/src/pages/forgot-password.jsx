@@ -18,7 +18,7 @@ const ForgotPasswordPage = () => {
     const [sendingOtp, setSendingOtp] = useState(false);
     const [resetting, setResetting] = useState(false);
 
-    const stepLabel = useMemo(() => (step === 1 ? 'Nhập email để nhận mã OTP khôi phục' : 'Nhập mã OTP và thiết lập mật khẩu mới'), [step]);
+    const stepLabel = useMemo(() => (step === 1 ? 'Enter your email to receive password recovery OTP' : 'Enter the OTP code and set your new password'), [step]);
 
     const handleRequestOtp = async (emailAddress) => {
         setSendingOtp(true);
@@ -29,19 +29,19 @@ const ForgotPasswordPage = () => {
                 setStep(2);
                 setValidated(false);
                 notification.success({
-                    message: 'Đã gửi mã OTP',
-                    description: 'Vui lòng kiểm tra email của bạn để nhận mã khôi phục mật khẩu.',
+                    message: 'OTP Sent',
+                    description: 'Please check your email for the password recovery OTP code.',
                 });
             } else {
                 notification.error({
-                    message: 'Không thể gửi mã OTP',
-                    description: res?.EM ?? 'Đã xảy ra lỗi khi gửi mã OTP!',
+                    message: 'Could Not Send OTP',
+                    description: res?.EM ?? 'An error occurred while sending the OTP code!',
                 });
             }
         } catch (error) {
             notification.error({
-                message: 'Lỗi kết nối',
-                description: 'Không thể kết nối máy chủ để gửi mã OTP.',
+                message: 'Connection Error',
+                description: 'Could not connect to server to send OTP code.',
             });
         } finally {
             setSendingOtp(false);
@@ -51,8 +51,8 @@ const ForgotPasswordPage = () => {
     const handleResetPassword = async (otpCode, newPassword, newConfirmPassword) => {
         if (!pendingEmail) {
             notification.error({
-                message: 'Thiếu thông tin email',
-                description: 'Vui lòng quay lại bước đầu tiên.',
+                message: 'Missing Email Address',
+                description: 'Please go back to the first step.',
             });
             setStep(1);
             return;
@@ -60,8 +60,8 @@ const ForgotPasswordPage = () => {
 
         if (newPassword !== newConfirmPassword) {
             notification.error({
-                message: 'Mật khẩu không khớp',
-                description: 'Mật khẩu xác nhận phải trùng khớp với mật khẩu mới.',
+                message: 'Passwords Do Not Match',
+                description: 'Confirm password must match the new password.',
             });
             return;
         }
@@ -76,8 +76,8 @@ const ForgotPasswordPage = () => {
 
             if (res && res.EC === 0) {
                 notification.success({
-                    message: 'Đặt lại mật khẩu thành công',
-                    description: 'Mật khẩu của bạn đã được cập nhật. Vui lòng đăng nhập bằng mật khẩu mới.',
+                    message: 'Password Reset Successful',
+                    description: 'Your password has been updated. Please sign in with your new password.',
                 });
                 setEmail('');
                 setOtp('');
@@ -89,14 +89,14 @@ const ForgotPasswordPage = () => {
                 navigate('/login');
             } else {
                 notification.error({
-                    message: 'Đặt lại mật khẩu thất bại',
-                    description: res?.EM ?? 'Mã OTP không chính xác hoặc đã hết hạn!',
+                    message: 'Password Reset Failed',
+                    description: res?.EM ?? 'Incorrect or expired OTP code!',
                 });
             }
         } catch (error) {
             notification.error({
-                message: 'Lỗi hệ thống',
-                description: 'Đã xảy ra sự cố trong quá trình đặt lại mật khẩu.',
+                message: 'System Error',
+                description: 'An error occurred during password reset.',
             });
         } finally {
             setResetting(false);
@@ -131,19 +131,19 @@ const ForgotPasswordPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div className="bootstrap-auth-links">
                 <Link to="/login">
-                    ← Quay lại đăng nhập
+                    ← Back to Sign In
                 </Link>
-                <Link to="/register">Tạo tài khoản mới</Link>
+                <Link to="/register">Create new account</Link>
             </div>
-            <div className="text-center mt-3 text-muted" style={{ fontSize: '0.85rem' }}>
-                Đã nhớ mật khẩu? <Link to="/login" style={{ color: '#3b82f6', fontWeight: 600 }}>Đăng nhập ngay</Link>
+            <div className="text-center mt-3" style={{ fontSize: '0.85rem' }}>
+                Remembered your password? <Link to="/login" style={{ color: '#3b82f6', fontWeight: 600 }}>Sign In now</Link>
             </div>
         </div>
     );
 
     return (
         <BootstrapAuthLayout
-            title="Quên mật khẩu"
+            title="Forgot Password"
             description={stepLabel}
             footer={footer}
         >
@@ -151,7 +151,7 @@ const ForgotPasswordPage = () => {
                 {step === 1 ? (
                     <>
                         <Form.Group className="mb-4" controlId="forgotEmail">
-                            <Form.Label>Địa chỉ Email</Form.Label>
+                            <Form.Label>Email Address</Form.Label>
                             <Form.Control
                                 required
                                 type="email"
@@ -160,7 +160,7 @@ const ForgotPasswordPage = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng nhập email hợp lệ!
+                                Please enter a valid email address!
                             </Form.Control.Feedback>
                         </Form.Group>
 
@@ -168,15 +168,15 @@ const ForgotPasswordPage = () => {
                             {sendingOtp ? (
                                 <>
                                     <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                                    Đang gửi OTP...
+                                    Sending OTP...
                                 </>
-                            ) : 'Gửi mã OTP'}
+                            ) : 'Send OTP Code'}
                         </Button>
                     </>
                 ) : (
                     <>
                         <Form.Group className="mb-3 text-center" controlId="forgotOtp">
-                            <Form.Label className="d-block text-start">Mã xác thực OTP</Form.Label>
+                            <Form.Label className="d-block text-start">OTP Verification Code</Form.Label>
                             <Form.Control
                                 required
                                 type="text"
@@ -188,47 +188,47 @@ const ForgotPasswordPage = () => {
                                 style={{ letterSpacing: '8px', paddingLeft: '20px' }}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng nhập mã OTP gồm 6 chữ số!
+                                Please enter the 6-digit OTP code!
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-3" controlId="forgotPassword">
-                            <Form.Label>Mật khẩu mới</Form.Label>
+                            <Form.Label>New Password</Form.Label>
                             <Form.Control
                                 required
                                 type="password"
-                                placeholder="Nhập mật khẩu mới của bạn"
+                                placeholder="Enter your new password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng nhập mật khẩu mới!
+                                Please enter a new password!
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group className="mb-4" controlId="forgotConfirmPassword">
-                            <Form.Label>Xác nhận mật khẩu</Form.Label>
+                            <Form.Label>Confirm Password</Form.Label>
                             <Form.Control
                                 required
                                 type="password"
-                                placeholder="Nhập lại mật khẩu mới"
+                                placeholder="Re-enter your new password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                             />
                             <Form.Control.Feedback type="invalid">
-                                Vui lòng xác nhận lại mật khẩu!
+                                Please confirm your new password!
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Row className="mb-4 g-2">
                             <Col xs={6}>
                                 <Button variant="outline-light" className="w-100 py-2" onClick={resendOtp} disabled={sendingOtp} style={{ borderRadius: '12px' }}>
-                                    {sendingOtp ? 'Đang gửi...' : 'Gửi lại OTP'}
+                                    {sendingOtp ? 'Sending...' : 'Resend OTP'}
                                 </Button>
                             </Col>
                             <Col xs={6}>
                                 <Button variant="outline-light" className="w-100 py-2" onClick={() => setStep(1)} style={{ borderRadius: '12px' }}>
-                                    Quay lại
+                                    Back
                                 </Button>
                             </Col>
                         </Row>
@@ -237,9 +237,9 @@ const ForgotPasswordPage = () => {
                             {resetting ? (
                                 <>
                                     <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
-                                    Đang khôi phục...
+                                    Resetting...
                                 </>
-                            ) : 'Đặt lại mật khẩu'}
+                            ) : 'Reset Password'}
                         </Button>
                     </>
                 )}

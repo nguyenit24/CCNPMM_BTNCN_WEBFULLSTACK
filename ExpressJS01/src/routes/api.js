@@ -66,6 +66,27 @@ const {
     cancelOrder,
     updateOrderStatus,
 } = require('../controllers/orderController');
+const {
+    createReview,
+    getProductReviews,
+    getMyRewards,
+    updateReview,
+    deleteReview,
+    getMyReviews,
+} = require('../controllers/reviewController');
+const { redeemVoucher, getMyVouchers, validateVoucher, getVoucherOptions } = require('../controllers/voucherController');
+const { calculateShipping } = require('../services/shippingService');
+const {
+    addFavorite,
+    removeFavorite,
+    getMyFavorites,
+} = require('../controllers/favoriteController');
+const {
+    addViewHistory,
+    getMyViewHistory,
+} = require('../controllers/viewHistoryController');
+const { getProductStatistics } = require('../controllers/statisticsController');
+const { upload, uploadImage } = require('../controllers/uploadController');
 const { authenticate, authorizeRoles } = require('../middleware/auth');
 const delay = require('../middleware/delay');
 const validateWithDto = require('../middleware/validateMiddleware');
@@ -75,6 +96,7 @@ const CategoryDto = require('../dtos/categoryDto');
 const ProductDto = require('../dtos/productDto');
 const PromotionDto = require('../dtos/promotionDto');
 const PostDto = require('../dtos/postDto');
+const CreateReviewDto = require('../dtos/createReviewDto');
 const dtoMiddleware = require('../middleware/dtoMiddleware');
 
 const routerAPI = express.Router();
@@ -107,8 +129,29 @@ routerAPI.get("/posts/:slug", getPostDetail);
 routerAPI.get("/products", getProducts);
 routerAPI.get("/products/top", getTopProducts);
 routerAPI.get("/products/:slug", getProductDetail);
+routerAPI.get("/reviews/product/:productId", getProductReviews);
+routerAPI.get("/products/:id/statistics", getProductStatistics);
 
 routerAPI.use(authenticate);
+
+routerAPI.post("/upload", upload.single("file"), uploadImage);
+routerAPI.post("/reviews", validateWithDto(CreateReviewDto), createReview);
+routerAPI.get("/reviews/me", getMyReviews);
+routerAPI.put("/reviews/:reviewId", updateReview);
+routerAPI.delete("/reviews/:reviewId", deleteReview);
+routerAPI.get("/rewards/me", getMyRewards);
+routerAPI.get("/vouchers/options", getVoucherOptions);
+routerAPI.get("/vouchers/me", getMyVouchers);
+routerAPI.post("/vouchers/redeem", redeemVoucher);
+routerAPI.post("/vouchers/validate", validateVoucher);
+routerAPI.post("/shipping/calculate", calculateShipping);
+
+routerAPI.post("/favorites", addFavorite);
+routerAPI.delete("/favorites/:productId", removeFavorite);
+routerAPI.get("/favorites/me", getMyFavorites);
+
+routerAPI.post("/view-history/:productId", addViewHistory);
+routerAPI.get("/view-history/me", getMyViewHistory);
 
 routerAPI.get("/account", delay, getAccount);
 routerAPI.put("/account/profile", updateAccountProfile);

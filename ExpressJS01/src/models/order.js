@@ -60,6 +60,8 @@ const orderSchema = new mongoose.Schema(
         items: { type: [orderItemSchema], default: [] },
         subtotal: { type: Number, required: true, default: 0 },
         shippingFee: { type: Number, default: 0 },
+        discount: { type: Number, default: 0 },
+        voucherCode: { type: String, default: '' },
         total: { type: Number, required: true, default: 0 },
         paymentMethod: { type: String, enum: ['COD'], default: 'COD' },
         paymentStatus: { type: String, default: 'pending' },

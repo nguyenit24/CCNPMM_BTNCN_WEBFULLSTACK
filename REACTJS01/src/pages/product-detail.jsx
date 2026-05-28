@@ -1,15 +1,25 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Button, Empty, Result, Spin, Tag, notification } from 'antd';
 import { MinusOutlined, PlusOutlined, StarFilled } from '@ant-design/icons';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ProductCard from '../components/catalog/product-card';
-import { addCartItemApi, getProductDetailApi } from '../util/api';
+import {
+    addCartItemApi,
+    getProductDetailApi,
+    addFavoriteApi,
+    removeFavoriteApi,
+    getMyFavoritesApi,
+    addViewHistoryApi,
+    getMyViewHistoryApi,
+    getProductStatisticsApi,
+    getProductReviewsApi
+} from '../util/api';
 import { AuthContext } from '../components/context/auth.context';
 
-const moneyFormatter = new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-});
+const formatPrice = (price) => {
+    if (price === undefined || price === null) return '';
+    return price.toLocaleString('vi-VN') + 'đ';
+};
 
 const ProductDetailPage = () => {
     const { slug } = useParams();
@@ -20,6 +30,14 @@ const ProductDetailPage = () => {
     const [quantity, setQuantity] = useState(1);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [addingToCart, setAddingToCart] = useState(false);
+    
+    // Feature integrations state
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [stats, setStats] = useState(null);
+    const [reviews, setReviews] = useState([]);
+    const [viewHistory, setViewHistory] = useState([]);
+    const [favoriteLoading, setFavoriteLoading] = useState(false);
+    const viewedProductRef = useRef(null);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -37,12 +55,57 @@ const ProductDetailPage = () => {
                 });
             }
 
+            if (res?.product) {
+                const productId = res.product._id;
+
+                // Fire async helper tasks
+                const promises = [
+                    getProductStatisticsApi(productId),
+                    getProductReviewsApi(productId)
+                ];
+
+                if (auth?.isAuthenticated) {
+                    if (viewedProductRef.current !== productId) {
+                        viewedProductRef.current = productId;
+                        promises.push(addViewHistoryApi(productId));
+                    }
+                    promises.push(getMyFavoritesApi());
+                    promises.push(getMyViewHistoryApi({ limit: 4 }));
+                }
+
+                const results = await Promise.allSettled(promises);
+
+                // Parse stats
+                if (results[0].status === 'fulfilled' && results[0].value && results[0].value.success !== false) {
+                    setStats(results[0].value);
+                }
+
+                // Parse reviews
+                if (results[1].status === 'fulfilled' && results[1].value?.items) {
+                    setReviews(results[1].value.items);
+                }
+
+                if (auth?.isAuthenticated) {
+                    // Parse favorites check
+                    if (results[3] && results[3].status === 'fulfilled' && results[3].value && results[3].value.success !== false) {
+                        const favItems = results[3].value.items || [];
+                        const isFav = favItems.some(item => item._id === productId);
+                        setIsFavorite(isFav);
+                    }
+
+                    // Parse view history
+                    if (results[4] && results[4].status === 'fulfilled' && results[4].value && results[4].value.success !== false) {
+                        setViewHistory(results[4].value.items || []);
+                    }
+                }
+            }
+
             setData(res);
             setLoading(false);
         };
 
         fetchDetail();
-    }, [slug]);
+    }, [slug, auth?.isAuthenticated]);
 
     const handleAddToCart = async () => {
         if (!auth?.isAuthenticated) {
@@ -70,6 +133,49 @@ const ProductDetailPage = () => {
         }
 
         setAddingToCart(false);
+    };
+
+    const handleToggleFavorite = async () => {
+        if (!auth?.isAuthenticated) {
+            notification.info({
+                message: 'Đăng nhập',
+                description: 'Vui lòng đăng nhập để lưu sản phẩm yêu thích.',
+            });
+            navigate('/login');
+            return;
+        }
+
+        setFavoriteLoading(true);
+        if (isFavorite) {
+            const res = await removeFavoriteApi(product._id);
+            if (res && res.success !== false) {
+                setIsFavorite(false);
+                notification.success({
+                    message: 'Yêu thích',
+                    description: 'Đã xóa sản phẩm khỏi danh sách yêu thích',
+                });
+            } else {
+                notification.error({
+                    message: 'Lỗi',
+                    description: res?.message || 'Có lỗi xảy ra',
+                });
+            }
+        } else {
+            const res = await addFavoriteApi(product._id);
+            if (res && res.success !== false) {
+                setIsFavorite(true);
+                notification.success({
+                    message: 'Yêu thích',
+                    description: 'Đã thêm sản phẩm vào danh sách yêu thích',
+                });
+            } else {
+                notification.error({
+                    message: 'Lỗi',
+                    description: res?.message || 'Có lỗi xảy ra',
+                });
+            }
+        }
+        setFavoriteLoading(false);
     };
 
     if (loading) {
@@ -152,9 +258,9 @@ const ProductDetailPage = () => {
                     ) : null}
 
                     <div className="product-detail__pricing">
-                        <span className="product-detail__price">{moneyFormatter.format(product.price)}</span>
+                        <span className="product-detail__price">{formatPrice(product.price)}</span>
                         {product.compareAtPrice > product.price ? (
-                            <span className="product-detail__compare">{moneyFormatter.format(product.compareAtPrice)}</span>
+                            <span className="product-detail__compare">{formatPrice(product.compareAtPrice)}</span>
                         ) : null}
                         {product.salePercent > 0 ? <Tag color="volcano">-{product.salePercent}%</Tag> : null}
                     </div>
@@ -162,15 +268,19 @@ const ProductDetailPage = () => {
                     <div className="product-detail__meta">
                         <div className="product-detail__meta-item">
                             <strong>{product.stock}</strong>
-                            <span>In stock</span>
+                            <span>Tồn kho</span>
                         </div>
                         <div className="product-detail__meta-item">
-                            <strong>{product.sold}</strong>
-                            <span>Sold</span>
+                            <strong>{stats?.sold !== undefined ? stats.sold : product.sold}</strong>
+                            <span>Đã bán</span>
                         </div>
                         <div className="product-detail__meta-item">
-                            <strong><StarFilled /> {Number(product.rating || 0).toFixed(1)}</strong>
-                            <span>Rating</span>
+                            <strong>{stats?.views !== undefined ? stats.views : (product.views || 0)}</strong>
+                            <span>Lượt xem</span>
+                        </div>
+                        <div className="product-detail__meta-item">
+                            <strong><StarFilled /> {Number(stats?.rating !== undefined ? stats.rating : (product.rating || 0)).toFixed(1)}</strong>
+                            <span>({reviews.length} đánh giá)</span>
                         </div>
                     </div>
 
@@ -187,17 +297,38 @@ const ProductDetailPage = () => {
                         {isOutOfStock ? 'Out of stock' : `${product.stock} items left in stock`}
                     </div>
 
-                    <div className="product-detail__actions">
+                    <div className="product-detail__actions" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                         <Button
                             type="primary"
                             size="large"
                             onClick={handleAddToCart}
                             disabled={isOutOfStock || addingToCart}
-                            block
+                            style={{ flex: 1, minWidth: '200px' }}
                         >
                             Thêm vào giỏ hàng
                         </Button>
-                        <Button size="large" onClick={() => navigate('/cart')} block>
+                        <Button
+                            size="large"
+                            onClick={handleToggleFavorite}
+                            loading={favoriteLoading}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '50px',
+                                height: '50px',
+                                borderRadius: '12px',
+                                borderColor: isFavorite ? '#ef4444' : '#d9d9d9',
+                                color: isFavorite ? '#ef4444' : '#0f172a',
+                                background: isFavorite ? '#fee2e2' : '#ffffff',
+                            }}
+                            title={isFavorite ? "Xóa khỏi danh sách yêu thích" : "Thêm vào danh sách yêu thích"}
+                        >
+                            <svg width="20" height="20" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </Button>
+                        <Button size="large" onClick={() => navigate('/cart')} style={{ width: '100%' }}>
                             Xem giỏ hàng
                         </Button>
                     </div>
@@ -231,7 +362,50 @@ const ProductDetailPage = () => {
                     </div>
                 </div>
 
-                <div className="content-card">
+                {/* Reviews Testimonials Section */}
+                <div className="content-card" style={{ marginTop: '24px' }}>
+                    <h2 className="content-card__title" style={{ marginBottom: '20px' }}>Đánh giá từ khách hàng ({reviews.length})</h2>
+                    {reviews.length > 0 ? (
+                        <div className="product-reviews-list">
+                            {reviews.map((r, i) => (
+                                <div key={r._id || i} style={{ borderBottom: '1px solid #f1f5f9', paddingBottom: '16px', marginBottom: '16px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                        <strong>{r.userId?.name || 'Khách hàng ẩn danh'}</strong>
+                                        <span style={{ color: '#f59e0b', fontSize: '0.9rem' }}>
+                                            {Array.from({ length: 5 }).map((_, idx) => (
+                                                <StarFilled key={idx} style={{ color: idx < r.rating ? '#f59e0b' : '#cbd5e1' }} />
+                                            ))}
+                                        </span>
+                                    </div>
+                                    <p style={{ margin: 0, color: '#475569', fontSize: '0.95rem', lineHeight: '1.5' }}>{r.comment}</p>
+                                    {r.images?.length > 0 && (
+                                        <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
+                                            {r.images.map((img, imgIdx) => (
+                                                <img key={imgIdx} src={img} alt="review attachment" style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <Empty description="Chưa có đánh giá nào cho sản phẩm này. Hãy mua sản phẩm và trở thành người đầu tiên đánh giá!" />
+                    )}
+                </div>
+
+                {/* Recently Viewed Products Section */}
+                {auth?.isAuthenticated && viewHistory.length > 0 && (
+                    <div className="content-card" style={{ marginTop: '24px' }}>
+                        <h2 className="content-card__title" style={{ marginBottom: '20px' }}>Sản phẩm đã xem gần đây</h2>
+                        <div className="store-grid--4">
+                            {viewHistory.slice(0, 4).map((item) => (
+                                <ProductCard key={item.slug} product={item} compact />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className="content-card" style={{ marginTop: '24px' }}>
                     <h2 className="content-card__title">Similar products</h2>
                     {similarProducts?.length > 0 ? (
                         <div className="store-grid--4">
